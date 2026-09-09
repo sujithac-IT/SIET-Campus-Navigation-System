@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://campus_user:campus_password@postgres:5432/campus_nav_db?sslmode=disable
+      - REDIS_URL=redis://redis:6379
+      - AUTH_SECRET=super_secret_production_campus_key_2026
+    depends_on:
+      - postgres
+      - redis
+    restart: always
+
+  postgres:
+    image: postgis/postgis:15-3.3-alpine
+    container_name: campus_postgis_db
+    environment:
+      POSTGRES_USER: campus_user
+      POSTGRES_PASSWORD: campus_password
+      POSTGRES_DB: campus_nav_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    container_name: campus_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: always
+
+volumes:
+  postgres_data:
+  redis_data:
