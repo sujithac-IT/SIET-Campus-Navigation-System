@@ -208,56 +208,85 @@ export default function TimetablePage() {
       {/* Schedule Timeline Slots */}
       <div className="space-y-4 max-w-4xl">
         {slots.length > 0 ? (
-          slots.map((slot: TimetableSlot, idx: number) => (
-            <div
-              key={slot.id}
-              className="bg-slate-900/40 border border-slate-800 hover:border-slate-700/80 rounded-2.5xl p-5 shadow-xl transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
-            >
-              <div className="flex items-start gap-4">
-                {/* Timeline Number indicator */}
-                <div className="w-8 h-8 rounded-xl bg-slate-800 border border-slate-750 flex items-center justify-center text-xs font-extrabold text-slate-400 group-hover:bg-sky-500/10 group-hover:border-sky-500/20 group-hover:text-sky-400 transition-all shrink-0">
-                  {idx + 1}
-                </div>
+          slots.map((slot: TimetableSlot, idx: number) => {
+            const isSlotChanged = slot.isChanged;
 
-                <div className="space-y-1.5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs text-sky-400 font-extrabold flex items-center gap-1 bg-sky-500/5 px-2.5 py-0.5 rounded-lg border border-sky-500/10">
-                      <Clock className="w-3.5 h-3.5 text-sky-400" />
-                      {slot.time}
-                    </span>
-                    <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-750 text-[10px] font-bold">
-                      Room: {slot.roomCode}
-                    </span>
-                  </div>
-
-                  <h4 className="font-extrabold text-sm text-slate-100 group-hover:text-sky-400 transition-colors">
-                    {slot.subject}
-                  </h4>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-[11px] text-slate-400 font-semibold">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5 text-slate-500" />
-                      {getBuildingName(slot.buildingId)}
-                    </span>
-                    <span className="hidden sm:inline text-slate-600">•</span>
-                    <span className="flex items-center gap-1">
-                      <User className="w-3.5 h-3.5 text-slate-500" />
-                      {slot.facultyName}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Button */}
-              <button
-                onClick={() => handleNavigate(slot.roomCode)}
-                className="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700/80 border border-slate-700/80 text-slate-200 hover:text-white font-bold text-xs transition shadow-md flex items-center justify-center gap-1.5 group-hover:bg-sky-600 group-hover:border-sky-500 group-hover:text-white"
+            return (
+              <div
+                key={slot.id}
+                className={`border rounded-2.5xl p-5 shadow-xl transition-all duration-300 flex flex-col sm:flex-row sm:items-center justify-between gap-4 group ${
+                  isSlotChanged
+                    ? 'bg-rose-950/30 border-rose-500/50 hover:border-rose-400'
+                    : 'bg-slate-900/40 border-slate-800 hover:border-slate-700/80'
+                }`}
               >
-                <Navigation className="w-4 h-4 group-hover:animate-bounce" />
-                <span>Navigate</span>
-              </button>
-            </div>
-          ))
+                <div className="flex items-start gap-4">
+                  {/* Timeline Number indicator */}
+                  <div className={`w-8 h-8 rounded-xl border flex items-center justify-center text-xs font-extrabold shrink-0 ${
+                    isSlotChanged
+                      ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                      : 'bg-slate-800 border-slate-750 text-slate-400 group-hover:bg-sky-500/10 group-hover:border-sky-500/20 group-hover:text-sky-400'
+                  }`}>
+                    {idx + 1}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-xs text-sky-400 font-extrabold flex items-center gap-1 bg-sky-500/5 px-2.5 py-0.5 rounded-lg border border-sky-500/10">
+                        <Clock className="w-3.5 h-3.5 text-sky-400" />
+                        {slot.time}
+                      </span>
+                      
+                      {isSlotChanged ? (
+                        <span className="px-2.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                          🚨 REASSIGNED ({slot.previousRoomCode || 'LH-25'} ➔ {slot.roomCode})
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-750 text-[10px] font-bold">
+                          Room: {slot.roomCode}
+                        </span>
+                      )}
+                    </div>
+
+                    <h4 className="font-extrabold text-sm text-slate-100 group-hover:text-sky-400 transition-colors">
+                      {slot.subject}
+                    </h4>
+
+                    {isSlotChanged && (
+                      <p className="text-[11px] text-rose-300 font-semibold italic bg-rose-950/60 px-3 py-1 rounded-lg border border-rose-500/30">
+                        Reason: {slot.changeReason || 'Room Reassignment'} • AI Advisory: Leave 5 minutes earlier to arrive on time.
+                      </p>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-[11px] text-slate-400 font-semibold">
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3.5 h-3.5 text-slate-500" />
+                        {getBuildingName(slot.buildingId)}
+                      </span>
+                      <span className="hidden sm:inline text-slate-600">•</span>
+                      <span className="flex items-center gap-1">
+                        <User className="w-3.5 h-3.5 text-slate-500" />
+                        {slot.facultyName}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Button */}
+                <button
+                  onClick={() => handleNavigate(slot.roomCode)}
+                  className={`py-2.5 px-4 rounded-xl border text-xs font-extrabold transition shadow-md flex items-center justify-center gap-1.5 shrink-0 ${
+                    isSlotChanged
+                      ? 'bg-rose-600 hover:bg-rose-500 text-white border-rose-400 shadow-rose-950'
+                      : 'bg-slate-800 hover:bg-slate-700/80 border-slate-700/80 text-slate-200 hover:text-white group-hover:bg-sky-600 group-hover:border-sky-500 group-hover:text-white'
+                  }`}
+                >
+                  <Navigation className="w-4 h-4 group-hover:animate-bounce" />
+                  <span>Navigate to {slot.roomCode}</span>
+                </button>
+              </div>
+            );
+          })
         ) : (
           <div className="py-16 text-center bg-slate-900/10 border border-slate-800 border-dashed rounded-3xl">
             <CalendarDays className="w-12 h-12 text-slate-600 mx-auto mb-2" />

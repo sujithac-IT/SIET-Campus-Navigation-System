@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Navbar } from '@/components/layout/Navbar';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { OfflineIndicator } from '@/components/layout/OfflineIndicator';
+import { NotificationToast } from '@/components/notifications/NotificationToast';
 import Script from 'next/script';
 
 export const metadata: Metadata = {
@@ -33,6 +34,7 @@ export default function RootLayout({
       </head>
       <body className="bg-[#080c14] text-slate-100 min-h-screen flex flex-col font-sans selection:bg-cyan-500 selection:text-white pb-16 lg:pb-0">
         <Navbar />
+        <NotificationToast />
         <main className="flex-1 w-full">
           {children}
         </main>

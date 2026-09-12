@@ -9,6 +9,7 @@ import { ExamHallLookup } from '@/components/search/ExamHallLookup';
 import { CampusAIBot } from '@/components/ai/CampusAIBot';
 import { PrivacyToggle } from '@/components/privacy/PrivacyToggle';
 import { ConstellationBackground } from '@/components/layout/ConstellationBackground';
+import { NextClassIntelligence } from '@/components/student/NextClassIntelligence';
 import { useCampusStore } from '@/lib/store/useCampusStore';
 import {
   Compass,
@@ -174,18 +175,223 @@ export default function LandingPage() {
 
         <main className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           
+          {/* DEMO FAST ROLE SWITCHER BAR */}
+          <div className="max-w-4xl mx-auto p-3 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs shadow-xl">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+              <span className="text-slate-400 font-bold">Active Role:</span>
+              <span className="px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 font-extrabold border border-sky-500/30 capitalize">
+                {currentUser?.role || 'Visitor (Logged Out)'}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[11px] text-slate-500 font-semibold">Switch Persona:</span>
+              <button
+                onClick={() => store.setCurrentUser(store.users[0])} // Sujitha C (Student)
+                className={`px-3 py-1 rounded-xl text-[11px] font-extrabold transition ${
+                  currentUser?.role === 'student'
+                    ? 'bg-emerald-600 text-white shadow'
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                }`}
+              >
+                Student (Sujitha C)
+              </button>
+              <button
+                onClick={() => store.setCurrentUser(store.users[1])} // Dr. Prakash (Faculty)
+                className={`px-3 py-1 rounded-xl text-[11px] font-extrabold transition ${
+                  currentUser?.role === 'faculty'
+                    ? 'bg-purple-600 text-white shadow'
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                }`}
+              >
+                Faculty
+              </button>
+              <button
+                onClick={() => store.setCurrentUser(store.users[2])} // Admin
+                className={`px-3 py-1 rounded-xl text-[11px] font-extrabold transition ${
+                  currentUser?.role === 'admin'
+                    ? 'bg-amber-600 text-white shadow'
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                }`}
+              >
+                Admin
+              </button>
+              <button
+                onClick={() => store.setCurrentUser(null)} // Visitor
+                className={`px-3 py-1 rounded-xl text-[11px] font-extrabold transition ${
+                  !currentUser
+                    ? 'bg-sky-600 text-white shadow'
+                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                }`}
+              >
+                Visitor
+              </button>
+            </div>
+          </div>
+
+          {/* STUDENT LOGGED IN MOBILE APP HOME SECTION */}
+          {currentUser && currentUser.role === 'student' && (
+            <div className="space-y-6 max-w-4xl mx-auto">
+              {/* Student Header Info Pill */}
+              <div className="p-5 rounded-3xl bg-gradient-to-r from-slate-900 via-sky-950/40 to-slate-900 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
+                <div className="flex items-center gap-3.5">
+                  <img
+                    src={currentUser.avatar}
+                    alt={currentUser.name}
+                    className="w-12 h-12 rounded-2xl object-cover ring-2 ring-sky-400/40 shadow-lg"
+                  />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-base font-extrabold text-white">{currentUser.name}</h3>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-500/30">
+                        {(currentUser as any).registerNumber || '732821104050'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400">
+                      {(currentUser as any).department || 'Department of Information Technology'} • Year {(currentUser as any).year || 3}, Sec {(currentUser as any).section || 'A'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/timetable"
+                    className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 transition"
+                  >
+                    Full Timetable
+                  </Link>
+                  <Link
+                    href="/dashboard/student"
+                    className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-xs shadow-md transition"
+                  >
+                    Student Portal
+                  </Link>
+                </div>
+              </div>
+
+              {/* AI CLASSROOM SHIFT ALERT BANNER (IF CHANGE OCCURRED) */}
+              {store.timetable.some((t) => t.isChanged) && (
+                <div className="p-5 rounded-3xl bg-gradient-to-r from-rose-950/80 via-slate-900 to-slate-900 border border-rose-500/50 shadow-2xl space-y-3 animate-pulse-subtle">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-xl bg-rose-500/20 text-rose-400">
+                        <Radio className="w-5 h-5 animate-pulse" />
+                      </div>
+                      <h4 className="text-sm font-extrabold text-rose-300">
+                        🚨 AI REAL-TIME CLASSROOM SHIFT DETECTED
+                      </h4>
+                    </div>
+                    <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                      CRITICAL ALERT
+                    </span>
+                  </div>
+
+                  {store.timetable
+                    .filter((t) => t.isChanged)
+                    .map((slot) => (
+                      <div key={slot.id} className="p-3 rounded-2xl bg-slate-950/80 border border-rose-500/30 space-y-2 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="font-extrabold text-white text-sm">{slot.subject}</span>
+                          <span className="text-slate-400 font-mono">{slot.time}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-slate-300 font-mono">
+                          <span>Previous: <del className="text-slate-500">{slot.previousRoomCode || 'LH-25'}</del></span>
+                          <ArrowRight className="w-4 h-4 text-rose-400" />
+                          <span className="text-emerald-400 font-extrabold">New Room: {slot.roomCode}</span>
+                        </div>
+                        <p className="text-[11px] text-sky-300 italic">
+                          AI Advisory: Class shifted to {slot.roomCode}. Leave 5 minutes earlier to arrive on time.
+                        </p>
+                        <button
+                          onClick={() => {
+                            store.startNavigationToRoom(slot.roomCode);
+                            router.push(`/map?navigate=${encodeURIComponent(slot.roomCode)}`);
+                          }}
+                          className="w-full mt-1 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-extrabold text-xs shadow-lg shadow-rose-950 flex items-center justify-center gap-2 transition"
+                        >
+                          <Navigation className="w-3.5 h-3.5 fill-current" />
+                          <span>NAVIGATE TO NEW VENUE ({slot.roomCode})</span>
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              )}
+
+              {/* NEXT CLASS INTELLIGENCE HERO COMPONENT */}
+              <NextClassIntelligence />
+
+              {/* TODAY'S TIMETABLE SCHEDULE LIST */}
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between px-1">
+                  <h3 className="text-xs font-black tracking-wider uppercase text-slate-400 flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-sky-400" />
+                    Today's Academic Schedule
+                  </h3>
+                  <span className="text-[11px] text-sky-400 font-semibold">
+                    {store.timetable.length} Sessions Scheduled
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {store.timetable.map((slot) => (
+                    <div
+                      key={slot.id}
+                      className={`p-4 rounded-2xl border transition-all duration-300 space-y-2.5 shadow-lg ${
+                        slot.isChanged
+                          ? 'bg-rose-950/20 border-rose-500/40 hover:border-rose-500'
+                          : 'bg-slate-900/80 border-slate-800 hover:border-sky-500/40'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-extrabold text-white flex items-center gap-1.5">
+                          <BookOpen className="w-3.5 h-3.5 text-sky-400" />
+                          {slot.subject}
+                        </span>
+                        <span className="text-[11px] font-mono text-slate-400">{slot.time}</span>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs text-slate-300">
+                        <div className="flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-rose-400" />
+                          <span className="font-bold text-slate-100">{slot.roomCode}</span>
+                          {slot.isChanged && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
+                              REASSIGNED
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-slate-400 text-[11px]">{slot.facultyName}</span>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          store.startNavigationToRoom(slot.roomCode);
+                          router.push(`/map?navigate=${encodeURIComponent(slot.roomCode)}`);
+                        }}
+                        className="w-full py-2 rounded-xl bg-slate-800 hover:bg-sky-600 text-slate-200 hover:text-white font-bold text-xs transition flex items-center justify-center gap-1.5"
+                      >
+                        <Navigation className="w-3.5 h-3.5" />
+                        <span>Navigate to {slot.roomCode}</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Global Search Bar Widget */}
-          <div className="space-y-4 max-w-4xl mx-auto">
+          <div className="space-y-4 max-w-4xl mx-auto pt-4">
             <GlobalSearch />
 
             {/* Category Filter Shortcuts */}
             <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-xs">
               <span className="text-slate-500 font-semibold text-[11px] mr-1">Quick Search Chips:</span>
               {[
-                { id: 'lh34a', label: 'LH 34A (3rd Floor Civil)' },
+                { id: 'lh28', label: 'LH 28 (Reassigned Room)' },
                 { id: 'lh25', label: 'LH 25 (2nd Floor Library)' },
-                { id: 'lh50', label: 'LH 50 (Ground Floor Civil)' },
-                { id: 'melh09', label: 'MELH 09 (Agri Dept)' },
+                { id: 'lh34a', label: 'LH 34A (Civil Block)' },
                 { id: '1b', label: '1B (Tech Park)' },
                 { id: 'prakash', label: 'Dr. Prakash (HOD)' },
                 { id: 'canteen', label: 'Central Food Court' }

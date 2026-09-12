@@ -138,6 +138,42 @@ export interface CampusEvent {
   coordinates: { x: number; y: number };
 }
 
+export type NotificationPriority = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+
+export interface AIImpactAnalysis {
+  subject: string;
+  previousRoomCode: string;
+  newRoomCode: string;
+  affectedStudentsCount: number;
+  urgency: NotificationPriority;
+  distanceDeltaMeters: number;
+  walkingTimeDeltaMinutes: number;
+  departureAdvice: string;
+  affectedDepartments: string[];
+}
+
+export interface QRCodeLocation {
+  id: string;
+  name: string;
+  buildingId: string;
+  buildingName: string;
+  floor: number;
+  roomCode?: string;
+  coordinates: { x: number; y: number };
+  description: string;
+}
+
+export interface FallbackLog {
+  id: string;
+  notificationId: string;
+  title: string;
+  recipientCount: number;
+  channels: ('SMS' | 'Email')[];
+  timestamp: string;
+  status: 'delivered' | 'queued';
+  sampleRecipient: string;
+}
+
 export interface NotificationItem {
   id: string;
   userId?: string;
@@ -145,9 +181,18 @@ export interface NotificationItem {
   title: string;
   message: string;
   type: 'info' | 'class_change' | 'status_update' | 'emergency' | 'event';
+  priority?: NotificationPriority;
+  impactAnalysis?: AIImpactAnalysis;
+  actionRoomCode?: string;
   timestamp: string;
   isRead: boolean;
   link?: string;
+  fallbackLog?: {
+    smsSent: boolean;
+    emailSent: boolean;
+    recipientCount: number;
+    timestamp: string;
+  };
 }
 
 export interface EmergencyAlert {
@@ -170,6 +215,11 @@ export interface TimetableSlot {
   roomCode: string;
   buildingId: string;
   facultyName: string;
+  section?: string;
+  department?: string;
+  isChanged?: boolean;
+  previousRoomCode?: string;
+  changeReason?: string;
 }
 
 export interface MeetingRequest {
@@ -183,3 +233,4 @@ export interface MeetingRequest {
   status: 'pending' | 'accepted' | 'declined';
   createdAt: string;
 }
+

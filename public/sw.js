@@ -6,6 +6,8 @@ const STATIC_ASSETS = [
   '/events',
   '/announcements',
   '/timetable',
+  '/notifications',
+  '/assistant',
   '/manifest.json',
   '/favicon.ico'
 ];

@@ -5,8 +5,14 @@ export function findRoute(
   startCoordinates: { x: number; y: number },
   targetCoordinates: { x: number; y: number },
   nodes: PathNode[] = INITIAL_PATH_NODES,
-  edges: PathEdge[] = INITIAL_PATH_EDGES
+  edges: PathEdge[] = INITIAL_PATH_EDGES,
+  options?: { isAccessibleOnly?: boolean }
 ): RouteResult {
+  // Filter edges if accessibility mode is enabled
+  const validEdges = options?.isAccessibleOnly
+    ? edges.filter((e) => e.isAccessible !== false && e.type !== 'stairs')
+    : edges;
+
   // Find nearest starting node
   const startNode = findNearestNode(startCoordinates, nodes);
   const targetNode = findNearestNode(targetCoordinates, nodes);
@@ -52,7 +58,7 @@ export function findRoute(
     unvisited.delete(currentNodeId);
 
     // Find all neighbors of currentNode
-    const connectedEdges = edges.filter(
+    const connectedEdges = validEdges.filter(
       (e) => e.from === currentNodeId || e.to === currentNodeId
     );
 

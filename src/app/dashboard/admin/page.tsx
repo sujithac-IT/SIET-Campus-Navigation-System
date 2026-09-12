@@ -5,6 +5,7 @@ import { useCampusStore } from '@/lib/store/useCampusStore';
 import { CampusMap } from '@/components/map/CampusMap';
 import { NotificationPanel } from '@/components/notifications/NotificationPanel';
 import { EmergencyButton } from '@/components/emergency/EmergencyModal';
+import { ClassroomChangeModal } from '@/components/admin/ClassroomChangeModal';
 import { Building, Room } from '@/types';
 import {
   Layers,
@@ -20,13 +21,16 @@ import {
   CheckCircle2,
   LogOut,
   ShieldCheck,
-  Navigation
+  Navigation,
+  RefreshCw,
+  Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminDashboard() {
   const store = useCampusStore();
   const [activeTab, setActiveTab] = useState<'analytics' | 'buildings' | 'users' | 'broadcast' | 'sos'>('analytics');
+  const [isShiftModalOpen, setIsShiftModalOpen] = useState(false);
 
   // Building Form State
   const [showAddBuildingModal, setShowAddBuildingModal] = useState(false);
@@ -207,9 +211,35 @@ export default function AdminDashboard() {
           </div>
         </div>
 
+        {/* Classroom Shift Modal */}
+        <ClassroomChangeModal isOpen={isShiftModalOpen} onClose={() => setIsShiftModalOpen(false)} />
+
         {/* Tab View Render */}
         {activeTab === 'analytics' && (
           <div className="space-y-6">
+            
+            {/* CORE USP CLASSROOM SHIFT HERO BANNER */}
+            <div className="p-6 rounded-3xl bg-gradient-to-r from-rose-950/80 via-slate-900 to-slate-900 border border-rose-500/40 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-2 max-w-2xl">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-xs font-black uppercase tracking-wider border border-rose-500/30">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  CORE USP REAL-TIME ENGINE
+                </div>
+                <h3 className="text-xl font-black text-white">Classroom & Timetable Change Dispatcher</h3>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Trigger instant timetable mutations (e.g. <strong>LH-25 ➔ LH-28</strong>). The AI Impact Analysis Engine identifies affected students, calculates distance/walking deltas (+3 mins), sends push alerts, and auto-opens student navigation routes.
+                </p>
+              </div>
+
+              <button
+                onClick={() => setIsShiftModalOpen(true)}
+                className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-cyan-600 hover:from-rose-500 hover:to-cyan-500 text-white font-extrabold text-xs shadow-xl shadow-rose-950 flex items-center justify-center gap-2 shrink-0 transition active:scale-95 border border-rose-400/30"
+              >
+                <RefreshCw className="w-4 h-4 animate-spin-slow" />
+                <span>Reassign Classroom (LH-25 ➔ LH-28)</span>
+              </button>
+            </div>
+
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-sm text-slate-200">Campus Digital Twin Map & Live Coordinates</h3>
               <button

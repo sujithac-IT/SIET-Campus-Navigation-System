@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Building, Room, User } from '@/types';
 import { FootprintLayer } from './FootprintLayer';
 import { LiveUserMarker } from './LiveUserMarker';
 import { NavigationRoute } from './NavigationRoute';
 import { FloorSelector } from './FloorSelector';
+import { QRScannerModal } from './QRScannerModal';
 import { useCampusStore } from '@/lib/store/useCampusStore';
+import { useSearchParams } from 'next/navigation';
 import {
   ZoomIn,
   ZoomOut,
@@ -21,8 +23,24 @@ import {
   ShieldCheck,
   CheckCircle2,
   X,
-  Info
+  Info,
+  QrCode,
+  Accessibility
 } from 'lucide-react';
+
+function MapNavParamListener() {
+  const store = useCampusStore();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const navTarget = searchParams?.get('navigate');
+    if (navTarget) {
+      store.startNavigationToRoom(navTarget);
+    }
+  }, [searchParams]);
+
+  return null;
+}
 
 interface CampusMapProps {
   onSelectRoomForNavigation?: (roomCode: string) => void;
@@ -35,6 +53,7 @@ export const CampusMap: React.FC<CampusMapProps> = ({ onSelectRoomForNavigation 
   const [isDarkMap, setIsDarkMap] = useState(true);
   const [activeBuildingModal, setActiveBuildingModal] = useState<Building | null>(null);
   const [activeRoomModal, setActiveRoomModal] = useState<Room | null>(null);
+  const [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
 
   const handleZoomIn = () => setZoom((z) => Math.min(z + 0.25, 2.5));
   const handleZoomOut = () => setZoom((z) => Math.max(z - 0.25, 0.75));
@@ -66,8 +85,35 @@ export const CampusMap: React.FC<CampusMapProps> = ({ onSelectRoomForNavigation 
           : 'bg-slate-100 border-slate-300 text-slate-900'
       }`}
     >
+      <Suspense fallback={null}>
+        <MapNavParamListener />
+      </Suspense>
+      <QRScannerModal isOpen={isQRScannerOpen} onClose={() => setIsQRScannerOpen(false)} />
+
       {/* Map Control Toolbar */}
       <div className="absolute top-4 right-4 flex flex-col gap-2 z-30">
+        {/* QR Scanner Trigger */}
+        <button
+          onClick={() => setIsQRScannerOpen(true)}
+          className="p-2.5 rounded-xl bg-sky-600 backdrop-blur-md border border-sky-400 text-white hover:bg-sky-500 transition shadow-xl animate-pulse"
+          title="Scan Indoor QR Location Code"
+        >
+          <QrCode className="w-4 h-4" />
+        </button>
+
+        {/* Accessibility Toggle */}
+        <button
+          onClick={() => store.toggleAccessibilityMode()}
+          className={`p-2.5 rounded-xl backdrop-blur-md border transition shadow-lg ${
+            store.isAccessibilityMode
+              ? 'bg-emerald-600 text-white border-emerald-400'
+              : 'bg-slate-900/80 border-slate-700/60 text-slate-300 hover:bg-slate-800'
+          }`}
+          title={store.isAccessibilityMode ? 'Accessibility Mode Active (Wheelchair/Elevators)' : 'Enable Accessibility Mode'}
+        >
+          <Accessibility className="w-4 h-4" />
+        </button>
+
         <button
           onClick={() => setIsDarkMap(!isDarkMap)}
           className="p-2.5 rounded-xl bg-slate-900/80 backdrop-blur-md border border-slate-700/60 text-slate-200 hover:text-white hover:bg-slate-800 transition shadow-lg"

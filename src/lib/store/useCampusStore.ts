@@ -19,13 +19,15 @@ import {
   INITIAL_EVENTS,
   INITIAL_NOTIFICATIONS,
   INITIAL_TIMETABLE,
-  INITIAL_ANNOUNCEMENTS
+  INITIAL_ANNOUNCEMENTS,
+  INITIAL_PATH_NODES,
+  INITIAL_PATH_EDGES
 } from '@/lib/data/seedData';
 import { findRoute } from '@/lib/navigation/router';
 
 // In-Memory Global State for real-time reactivity across components
 class GlobalState {
-  public currentUser: User | null = null; // Default to guest/visitor mode for navigation-first experience
+  public currentUser: User | null = INITIAL_USERS[0]; // Default to student Sujitha C for instant rich mobile home app experience
   public users: User[] = [...INITIAL_USERS];
   public buildings: Building[] = [...INITIAL_BUILDINGS];
   public events: CampusEvent[] = [...INITIAL_EVENTS];
@@ -41,6 +43,19 @@ class GlobalState {
   public activeRoute: RouteResult | null = null;
   public destination: { x: number; y: number; name: string } | null = null;
   public isSharingLocation: boolean = true;
+  public isAccessibilityMode: boolean = false;
+  public latestPushToast: NotificationItem | null = null;
+  public fallbackLogs: { id: string; notificationId?: string; title: string; recipientCount: number; channels: string[]; timestamp: string; status: string; sampleRecipient: string }[] = [
+    {
+      id: 'fb-log-1',
+      title: 'Classroom Change Alert: Data Structures',
+      recipientCount: 62,
+      channels: ['SMS', 'Email'],
+      timestamp: 'Today at 08:45 AM',
+      status: 'delivered',
+      sampleRecipient: '+91 98765 43210 (sujitha.c@siet.ac.in)'
+    }
+  ];
 
   private listeners = new Set<() => void>();
 
@@ -61,6 +76,20 @@ class GlobalState {
     if (user) {
       this.isSharingLocation = user.liveLocationSharing;
     }
+    this.notify();
+  }
+
+  public toggleAccessibilityMode(status?: boolean) {
+    this.isAccessibilityMode = status !== undefined ? status : !this.isAccessibilityMode;
+    if (this.destination) {
+      // Recalculate active route with accessibility mode
+      this.activeRoute = findRoute(this.userLocation, { x: this.destination.x, y: this.destination.y }, INITIAL_PATH_NODES, INITIAL_PATH_EDGES, { isAccessibleOnly: this.isAccessibilityMode });
+    }
+    this.notify();
+  }
+
+  public clearPushToast() {
+    this.latestPushToast = null;
     this.notify();
   }
 
@@ -105,7 +134,8 @@ class GlobalState {
       roleTarget: ann.roleTarget || 'all',
       title: `📢 ${ann.title}`,
       message: ann.message,
-      type: ann.category === 'emergency' ? 'emergency' : 'info'
+      type: ann.category === 'emergency' ? 'emergency' : 'info',
+      priority: ann.category === 'emergency' ? 'CRITICAL' : 'LOW'
     });
     
     this.notify();
@@ -131,6 +161,147 @@ class GlobalState {
     this.notify();
   }
 
+  public scanQRCode(qrCodeId: string): { success: boolean; locationName: string; coords: { x: number; y: number } } {
+    // Map QR Codes to precise campus locations
+    const qrMap: Record<string, { name: string; buildingId: string; floor: number; coords: { x: number; y: number } }> = {
+      'SIET-QR-LH25': { name: 'Library Block Floor 2 (LH-25 Entrance)', buildingId: 'b-lib', floor: 2, coords: { x: 71, y: 36 } },
+      'SIET-QR-LH28': { name: 'Library Block Floor 2 (LH-28 Entrance)', buildingId: 'b-lib', floor: 2, coords: { x: 74, y: 37 } },
+      'SIET-QR-TECHPARK': { name: 'Tech Park Block (Main Lobby)', buildingId: 'b-techpark', floor: 0, coords: { x: 80, y: 70 } },
+      'SIET-QR-CANTEEN': { name: 'Central Food Court (Main Door)', buildingId: 'b-canteen', floor: 0, coords: { x: 45, y: 75 } },
+      'SIET-QR-GATE': { name: 'SIET Main Security Gate', buildingId: 'b-gate', floor: 0, coords: { x: 15, y: 88 } }
+    };
+
+    const target = qrMap[qrCodeId] || qrMap['SIET-QR-LH25'];
+    this.userLocation = target.coords;
+    if (this.currentUser) {
+      this.currentUser.currentCoordinates = target.coords;
+    }
+
+    if (this.destination) {
+      // Recalculate route from new QR position
+      this.activeRoute = findRoute(target.coords, { x: this.destination.x, y: this.destination.y }, INITIAL_PATH_NODES, INITIAL_PATH_EDGES, { isAccessibleOnly: this.isAccessibilityMode });
+    }
+
+    this.notify();
+    return { success: true, locationName: target.name, coords: target.coords };
+  }
+
+  // AI IMPACT ANALYSIS & CLASSROOM REASSIGNMENT ENGINE (CORE USP)
+  public triggerClassroomReassignment(params: {
+    subject: string;
+    oldRoomCode: string;
+    newRoomCode: string;
+    reason: string;
+    affectedDepartments?: string[];
+  }) {
+    const { subject, oldRoomCode, newRoomCode, reason, affectedDepartments = ['Department of Information Technology'] } = params;
+
+    // 1. Find Room coordinates for AI impact calculation
+    let oldCoords = { x: 71, y: 36 };
+    let newCoords = { x: 74, y: 37 };
+    let oldBuildingName = 'Library Block';
+    let newBuildingName = 'Library Block';
+
+    for (const b of this.buildings) {
+      for (const f of b.floors) {
+        for (const r of f.rooms) {
+          if (r.code.toLowerCase() === oldRoomCode.toLowerCase()) {
+            oldCoords = r.coordinates;
+            oldBuildingName = b.name;
+          }
+          if (r.code.toLowerCase() === newRoomCode.toLowerCase()) {
+            newCoords = r.coordinates;
+            newBuildingName = b.name;
+          }
+        }
+      }
+    }
+
+    // AI Impact Calculations
+    const distanceDeltaMeters = Math.round(
+      Math.sqrt(Math.pow(newCoords.x - oldCoords.x, 2) + Math.pow(newCoords.y - oldCoords.y, 2)) * 12
+    );
+    const walkingTimeDeltaMinutes = Math.max(1, Math.ceil(distanceDeltaMeters / 60));
+    const affectedStudentsCount = 62; // IT Dept 3rd Year Section A
+    const urgency: 'CRITICAL' | 'HIGH' = 'CRITICAL';
+    const departureAdvice = walkingTimeDeltaMinutes > 2
+      ? `Class relocated to ${newRoomCode} (${newBuildingName}). Leave ${walkingTimeDeltaMinutes + 3} minutes earlier to arrive on time.`
+      : `Class moved from ${oldRoomCode} to ${newRoomCode} (${newBuildingName}). Route updated automatically.`;
+
+    const impactAnalysis = {
+      subject,
+      previousRoomCode: oldRoomCode,
+      newRoomCode,
+      affectedStudentsCount,
+      urgency,
+      distanceDeltaMeters,
+      walkingTimeDeltaMinutes,
+      departureAdvice,
+      affectedDepartments
+    };
+
+    // 2. Update Timetable in Global Store
+    this.timetable = this.timetable.map((slot) => {
+      if (
+        slot.roomCode.toLowerCase() === oldRoomCode.toLowerCase() ||
+        slot.subject.toLowerCase().includes(subject.toLowerCase())
+      ) {
+        return {
+          ...slot,
+          roomCode: newRoomCode,
+          isChanged: true,
+          previousRoomCode: oldRoomCode,
+          changeReason: reason
+        };
+      }
+      return slot;
+    });
+
+    // 3. Create Notification Item
+    const notification: NotificationItem = {
+      id: `notif-reassign-${Date.now()}`,
+      roleTarget: 'student',
+      title: `🔔 CLASSROOM CHANGED: ${subject}`,
+      message: `${subject} has moved from ${oldRoomCode} to ${newRoomCode}. ${departureAdvice}`,
+      type: 'class_change',
+      priority: 'CRITICAL',
+      impactAnalysis,
+      actionRoomCode: newRoomCode,
+      link: `/map?navigate=${encodeURIComponent(newRoomCode)}`,
+      timestamp: 'Just now',
+      isRead: false,
+      fallbackLog: {
+        smsSent: true,
+        emailSent: true,
+        recipientCount: affectedStudentsCount,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+    };
+
+    this.notifications.unshift(notification);
+    this.latestPushToast = notification;
+
+    // 4. Log simulated SMS/Email Fallback
+    this.fallbackLogs.unshift({
+      id: `fb-log-${Date.now()}`,
+      notificationId: notification.id,
+      title: `${subject} Room Shift: ${oldRoomCode} ➔ ${newRoomCode}`,
+      recipientCount: affectedStudentsCount,
+      channels: ['SMS', 'Email'],
+      timestamp: 'Just now',
+      status: 'delivered',
+      sampleRecipient: '+91 98765 43210 (sujitha.c@siet.ac.in)'
+    });
+
+    // 5. Automatically recalculate navigation target if navigating to oldRoom
+    if (this.selectedRoomCode?.toLowerCase() === oldRoomCode.toLowerCase() || (this.destination && this.destination.name.includes(oldRoomCode))) {
+      this.startNavigationToRoom(newRoomCode);
+    }
+
+    this.notify();
+    return impactAnalysis;
+  }
+
   public selectBuilding(buildingId: string | null) {
     this.selectedBuildingId = buildingId;
     this.selectedFloor = 0;
@@ -152,7 +323,7 @@ class GlobalState {
           this.selectedFloor = room.floor;
           this.selectedRoomCode = room.code;
           this.destination = { x: room.coordinates.x, y: room.coordinates.y, name: `${room.name} (${b.name})` };
-          this.activeRoute = findRoute(this.userLocation, room.coordinates);
+          this.activeRoute = findRoute(this.userLocation, room.coordinates, INITIAL_PATH_NODES, INITIAL_PATH_EDGES, { isAccessibleOnly: this.isAccessibilityMode });
           this.notify();
           return true;
         }
@@ -163,7 +334,7 @@ class GlobalState {
 
   public startNavigationToCoords(coords: { x: number; y: number }, name: string) {
     this.destination = { ...coords, name };
-    this.activeRoute = findRoute(this.userLocation, coords);
+    this.activeRoute = findRoute(this.userLocation, coords, INITIAL_PATH_NODES, INITIAL_PATH_EDGES, { isAccessibleOnly: this.isAccessibilityMode });
     this.notify();
   }
 
