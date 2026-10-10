@@ -7,12 +7,15 @@ import { logger } from './core/logger.js';
 import { errorHandler } from './core/middleware/errorHandler.js';
 import { NotFoundError } from './core/errors.js';
 import { authRoutes } from './modules/auth/auth.routes.js';
+import { placesRoutes } from './modules/places/places.routes.js';
+import { buildingsRoutes } from './modules/places/buildings.routes.js';
+import { setupSwagger } from './core/swagger.js';
 
 export function createApp(): Express {
   const app = express();
 
   // Security Headers
-  app.use(helmet());
+  app.use(helmet({ contentSecurityPolicy: false })); // allow Swagger UI assets
 
   // CORS Configuration
   app.use(
@@ -27,6 +30,9 @@ export function createApp(): Express {
   // Body and Cookie Parsers
   app.use(express.json());
   app.use(cookieParser(config.COOKIE_SECRET));
+
+  // Swagger OpenAPI Documentation
+  setupSwagger(app);
 
   // Request logger middleware
   app.use((req: Request, _res: Response, next: NextFunction) => {
@@ -48,6 +54,8 @@ export function createApp(): Express {
 
   // API v1 Routes
   app.use('/api/v1/auth', authRoutes);
+  app.use('/api/v1/places', placesRoutes);
+  app.use('/api/v1/buildings', buildingsRoutes);
 
   // 404 Not Found Handler
   app.use((req: Request, _res: Response, next: NextFunction) => {
