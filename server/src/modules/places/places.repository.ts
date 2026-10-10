@@ -101,6 +101,16 @@ const FALLBACK_PLACES: PlaceWithDetails[] = [
   { id: 'p-tp-cld', name: 'Cloud Computing & DevOps Lab', code: 'TECH-CLOUD-LAB', type: PlaceType.LAB, buildingId: 'b-tech', floorId: 'f-tech-2', nodeId: 'node-tech-f2', lat: SIET_LAT + 0.00122, lng: SIET_LNG + 0.00059, aliases: ['Cloud Lab', 'AWS Lab'], tags: ['techpark', 'lab'], openHours: null, description: null, createdAt: new Date(), updatedAt: new Date(), building: FALLBACK_BUILDINGS[2], floor: FALLBACK_BUILDINGS[2]?.floors[2] },
 ];
 
+let lastDbFailure = 0;
+function shouldAttemptDb(): boolean {
+  if (process.env['NODE_ENV'] === 'test') return false;
+  if (Date.now() - lastDbFailure < 30000) return false;
+  return true;
+}
+function markDbFailure() {
+  lastDbFailure = Date.now();
+}
+
 export class PlacesRepository {
   async search(
     query?: string,
@@ -108,56 +118,63 @@ export class PlacesRepository {
     buildingId?: string,
     limit = 20
   ): Promise<PlaceWithDetails[]> {
-    try {
-      const whereClause: Record<string, unknown> = {};
-      if (type) whereClause['type'] = type;
-      if (buildingId) whereClause['buildingId'] = buildingId;
-      if (query && query.trim().length > 0) {
-        const q = query.trim();
-        whereClause['OR'] = [
-          { name: { contains: q, mode: 'insensitive' } },
-          { code: { contains: q, mode: 'insensitive' } },
-          { aliases: { has: q } },
-          { tags: { has: q.toLowerCase() } },
-        ];
-      }
+    if (shouldAttemptDb()) {
+      try {
+        const whereClause: Record<string, unknown> = {};
+        if (type) whereClause['type'] = type;
+        if (buildingId) whereClause['buildingId'] = buildingId;
+        if (query && query.trim().length > 0) {
+          const q = query.trim();
+          whereClause['OR'] = [
+            { name: { contains: q, mode: 'insensitive' } },
+            { code: { contains: q, mode: 'insensitive' } },
+            { aliases: { has: q } },
+            { tags: { has: q.toLowerCase() } },
+          ];
+        }
 
-      return await prisma.place.findMany({
-        where: whereClause,
-        include: { building: true, floor: true },
-        take: limit,
-        orderBy: { name: 'asc' },
-      });
-    } catch {
-      logger.debug('Using fallback in-memory places catalog (offline database mode)');
-      let results = [...FALLBACK_PLACES];
-      if (type) results = results.filter((p) => p.type === type);
-      if (buildingId) results = results.filter((p) => p.buildingId === buildingId);
-      if (query && query.trim().length > 0) {
-        const q = query.trim().toLowerCase();
-        results = results.filter(
-          (p) =>
-            p.name.toLowerCase().includes(q) ||
-            p.code?.toLowerCase().includes(q) ||
-            p.aliases.some((al) => al.toLowerCase().includes(q)) ||
-            p.tags.some((t) => t.toLowerCase().includes(q))
-        );
+        return await prisma.place.findMany({
+          where: whereClause,
+          include: { building: true, floor: true },
+          take: limit,
+          orderBy: { name: 'asc' },
+        });
+      } catch {
+        markDbFailure();
+        logger.debug('Using fallback in-memory places catalog (offline database mode)');
       }
-      return results.slice(0, limit);
     }
+
+    let results = [...FALLBACK_PLACES];
+    if (type) results = results.filter((p) => p.type === type);
+    if (buildingId) results = results.filter((p) => p.buildingId === buildingId);
+    if (query && query.trim().length > 0) {
+      const q = query.trim().toLowerCase();
+      results = results.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.code?.toLowerCase().includes(q) ||
+          p.aliases.some((al) => al.toLowerCase().includes(q)) ||
+          p.tags.some((t) => t.toLowerCase().includes(q))
+      );
+    }
+    return results.slice(0, limit);
   }
 
   async findById(idOrCode: string): Promise<PlaceWithDetails | null> {
-    try {
-      const place = await prisma.place.findFirst({
-        where: {
-          OR: [{ id: idOrCode }, { code: idOrCode }],
-        },
-        include: { building: true, floor: true, node: true },
-      });
-      if (place) return place;
-    } catch {
-      logger.debug('Using fallback in-memory places catalog for findById');
+    if (shouldAttemptDb()) {
+      try {
+        const place = await prisma.place.findFirst({
+          where: {
+            OR: [{ id: idOrCode }, { code: idOrCode }],
+          },
+          include: { building: true, floor: true, node: true },
+        });
+        if (place) return place;
+      } catch {
+        markDbFailure();
+        logger.debug('Using fallback in-memory places catalog for findById');
+      }
     }
 
     return (

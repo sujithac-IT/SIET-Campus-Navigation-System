@@ -273,6 +273,60 @@ export const openApiSpec = {
         },
       },
     },
+    '/api/v1/route': {
+      post: {
+        summary: 'Compute optimal 3D turn-by-turn route between campus waypoints',
+        tags: ['Routing'],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['from', 'to'],
+                properties: {
+                  from: { type: 'string', example: 'GATE-01', description: 'Origin place code, node ID, or "lat,lng"' },
+                  to: { type: 'string', example: 'LH-05', description: 'Destination place code, room name, or node ID' },
+                  accessible: { type: 'boolean', default: false, description: 'Prioritize wheelchair-accessible paths (ramps/elevators, no stairs)' },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Route calculated successfully with distance, ETA, polyline, and turn-by-turn steps',
+          },
+          '400': { description: 'Validation failed' },
+          '404': { description: 'Origin, destination, or walkable path not found' },
+        },
+      },
+    },
+    '/route': {
+      post: {
+        summary: 'Alias endpoint for POST /api/v1/route',
+        tags: ['Routing'],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['from', 'to'],
+                properties: {
+                  from: { type: 'string', example: 'GATE-01' },
+                  to: { type: 'string', example: 'TECH-AI-LAB' },
+                  accessible: { type: 'boolean', default: false },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': { description: 'Route calculated successfully' },
+        },
+      },
+    },
   },
 };
 

@@ -9,6 +9,7 @@ import { NotFoundError } from './core/errors.js';
 import { authRoutes } from './modules/auth/auth.routes.js';
 import { placesRoutes } from './modules/places/places.routes.js';
 import { buildingsRoutes } from './modules/places/buildings.routes.js';
+import { routingRoutes } from './modules/routing/routing.routes.js';
 import { setupSwagger } from './core/swagger.js';
 
 export function createApp(): Express {
@@ -56,6 +57,8 @@ export function createApp(): Express {
   app.use('/api/v1/auth', authRoutes);
   app.use('/api/v1/places', placesRoutes);
   app.use('/api/v1/buildings', buildingsRoutes);
+  app.use('/api/v1/route', routingRoutes);
+  app.use('/route', routingRoutes);
 
   // 404 Not Found Handler
   app.use((req: Request, _res: Response, next: NextFunction) => {
