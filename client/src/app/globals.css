@@ -1,14 +1,56 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --neon-cyan: #06b6d4;
+  --neon-emerald: #10b981;
+  --neon-purple: #8b5cf6;
+  --neon-amber: #f59e0b;
+}
+
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-100 antialiased selection:bg-sky-500 selection:text-white;
-    font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    @apply bg-slate-950 text-slate-100 antialiased selection:bg-cyan-500 selection:text-black;
+    font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    overflow-x: hidden;
   }
+
+  code, kbd, samp, pre {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Glassmorphism & Cyber Accents */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+}
+
+.glass-panel-hover {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-panel-hover:hover {
+  border-color: rgba(6, 182, 212, 0.45);
+  box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.25);
+  transform: translateY(-2px);
+}
+
+.neon-glow-cyan {
+  box-shadow: 0 0 20px -3px rgba(6, 182, 212, 0.45);
+}
+
+.neon-glow-emerald {
+  box-shadow: 0 0 20px -3px rgba(16, 185, 129, 0.45);
+}
+
+.neon-text-glow {
+  text-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
 }
 
 /* Custom Scrollbar */
@@ -23,33 +65,64 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(56, 189, 248, 0.4);
+  background: rgba(6, 182, 212, 0.4);
   border-radius: 9999px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(56, 189, 248, 0.8);
+  background: rgba(6, 182, 212, 0.8);
 }
 
-/* Dash animation for route line */
-@keyframes dash {
-  to {
-    stroke-dashoffset: -28;
+/* Animated Grid & Radar Keyframes */
+@keyframes radar-sweep {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
 
-/* Footstep trail keyframes */
-@keyframes footstep {
-  0%, 100% {
-    opacity: 0.15;
-    transform: scale(0.85);
+.animate-radar {
+  animation: radar-sweep 12s linear infinite;
+  transform-origin: center;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.9;
   }
   50% {
-    opacity: 1;
-    transform: scale(1.15);
+    transform: scale(1.6);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(0.9);
+    opacity: 0;
   }
 }
 
-.animate-footstep {
-  animation: footstep 1.8s ease-in-out infinite;
+.animate-pulse-ring {
+  animation: pulse-ring 2.4s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+@keyframes dash-flow {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+
+.animate-route-flow {
+  animation: dash-flow 1.8s linear infinite;
+}
+
+/* Accessibility: Respect Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

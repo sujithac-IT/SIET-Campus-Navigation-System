@@ -7,8 +7,8 @@ import { NotificationToast } from '@/components/notifications/NotificationToast'
 import Script from 'next/script';
 
 export const metadata: Metadata = {
-  title: 'Smart Campus Navigator - Real-Time Offline Navigation System',
-  description: 'Digital campus navigation PWA with A* routing, indoor positioning, grounded AI assistant, and real-time classroom updates.',
+  title: 'SIET Navigate — Smart Campus Navigation & Timetable System',
+  description: 'Production-quality campus navigation PWA for Sri Shakthi Institute of Engineering & Technology (SIET). Turn-by-turn indoor & outdoor directions, real-time timetable shift alerts, and AI voice assistance.',
   manifest: '/manifest.json',
 };
 

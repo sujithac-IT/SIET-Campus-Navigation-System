@@ -29,50 +29,15 @@ export const Navbar: React.FC = () => {
   const currentUser = store.currentUser;
   const [isOpen, setIsOpen] = React.useState(false);
 
-  // Define navigation items based on role
+  // Define navigation items
   const getNavLinks = () => {
-    if (!currentUser) {
-      // Guest Links
-      return [
-        { href: '/', label: 'Home', icon: Home },
-        { href: '/map', label: 'Campus Map', icon: Map },
-        { href: '/facilities', label: 'Facilities', icon: Briefcase },
-        { href: '/events', label: 'Events', icon: Calendar },
-        { href: '/announcements', label: 'Announcements', icon: Radio },
-      ];
-    }
-
-    if (currentUser.role === 'student') {
-      return [
-        { href: '/', label: 'Home', icon: Home },
-        { href: '/map', label: 'Map', icon: Map },
-        { href: '/timetable', label: 'Timetable', icon: Calendar },
-        { href: '/facilities', label: 'Facilities', icon: Briefcase },
-        { href: '/events', label: 'Events', icon: Calendar },
-        { href: '/dashboard/student', label: 'Student Portal', icon: GraduationCap },
-      ];
-    }
-
-    if (currentUser.role === 'faculty') {
-      return [
-        { href: '/', label: 'Home', icon: Home },
-        { href: '/map', label: 'Map', icon: Map },
-        { href: '/timetable', label: 'Timetable', icon: Calendar },
-        { href: '/facilities', label: 'Facilities', icon: Briefcase },
-        { href: '/events', label: 'Events', icon: Calendar },
-        { href: '/announcements', label: 'Announcements', icon: Radio },
-        { href: '/dashboard/faculty', label: 'Faculty Portal', icon: Shield },
-      ];
-    }
-
-    // Admin Links
     return [
       { href: '/', label: 'Home', icon: Home },
       { href: '/map', label: 'Map', icon: Map },
-      { href: '/facilities', label: 'Facilities', icon: Briefcase },
-      { href: '/events', label: 'Events', icon: Calendar },
+      { href: '/navigate', label: 'Navigation HUD', icon: Compass },
+      { href: '/timetable', label: 'Timetable', icon: Calendar },
+      { href: '/exams', label: 'Exams', icon: GraduationCap },
       { href: '/announcements', label: 'Announcements', icon: Radio },
-      { href: '/dashboard/admin', label: 'Admin Portal', icon: Layers },
     ];
   };
 
@@ -110,9 +75,9 @@ export const Navbar: React.FC = () => {
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-black text-base tracking-tight text-white">
-                  Campus<span className="text-sky-400">Pulse</span>
+                  SIET <span className="text-cyan-400">Navigate</span>
                 </span>
-                <span className="px-1.5 py-0.5 rounded-full text-[8px] font-black uppercase bg-sky-500/15 text-sky-300 border border-sky-500/30 tracking-wider">
+                <span className="px-1.5 py-0.5 rounded-full text-[8px] font-black uppercase bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 tracking-wider">
                   Smart Campus
                 </span>
               </div>

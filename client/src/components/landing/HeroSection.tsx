@@ -1,37 +1,45 @@
+'use client';
+
 import React from 'react';
-import { motion } from 'framer-motion';
-import MapPlaceholder from './MapPlaceholder';
+import Link from 'next/link';
+import { HeroCanvas } from './HeroCanvas';
+import { MapPin, ShieldCheck, ChevronRight } from 'lucide-react';
 
 export default function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-white py-24" id="hero">
-      <div className="container mx-auto px-4 flex flex-col-reverse md:flex-row items-center">
-        {/* Text content */}
-        <div className="md:w-1/2 space-y-6">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
-            Your Campus. Smarter. Always One Step Ahead.
+    <section className="relative overflow-hidden py-16" id="hero">
+      <div className="container mx-auto px-4 flex flex-col lg:flex-row items-center gap-12">
+        <div className="lg:w-1/2 space-y-6 text-center lg:text-left">
+          <h1 className="text-4xl md:text-5xl font-black text-white leading-tight">
+            Navigate SIET Campus <span className="text-cyan-400">Like a Game.</span>
           </h1>
-          <p className="text-lg text-gray-600">
-            AI-powered navigation that knows where your next class is, detects classroom changes in real time, and guides you there before you're late.
+          <p className="text-base text-slate-300">
+            Turn-by-turn voice directions to classrooms, floors, labs, Tech Park, canteen, and hostels with real-time room shift alerts.
           </p>
-          <div className="flex space-x-4">
-            <a
-              href="/app"
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+          <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
+            <Link
+              href="/map?focus=search"
+              className="px-6 py-3.5 bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-bold rounded-2xl shadow-lg shadow-cyan-400/20 transition flex items-center gap-2"
             >
-              Open Smart Navigation
-            </a>
-            <a
-              href="#ai-explore"
-              className="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg shadow hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+              <MapPin className="w-4 h-4" /> Find a Place
+            </Link>
+            <Link
+              href="/map?mode=visitor"
+              className="px-6 py-3.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold rounded-2xl transition flex items-center gap-2"
             >
-              Explore AI
-            </a>
+              <ShieldCheck className="w-4 h-4 text-cyan-400" /> I'm a Visitor
+            </Link>
+            <Link
+              href="/auth"
+              className="px-6 py-3.5 bg-transparent hover:bg-slate-900 border border-slate-800 text-slate-300 rounded-2xl transition flex items-center gap-1.5"
+            >
+              <span>Login</span>
+              <ChevronRight className="w-4 h-4" />
+            </Link>
           </div>
         </div>
-        {/* Map visualization */}
-        <div className="md:w-1/2 mb-8 md:mb-0 flex justify-center md:justify-end">
-          <MapPlaceholder />
+        <div className="lg:w-1/2 w-full flex justify-center">
+          <HeroCanvas />
         </div>
       </div>
     </section>
