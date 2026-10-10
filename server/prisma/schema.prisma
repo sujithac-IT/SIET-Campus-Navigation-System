@@ -1,0 +1,412 @@
+// Prisma Schema for SIET Smart Campus Navigation Monolith
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -----------------------------------------------------------------------------
+// ENUMS
+// -----------------------------------------------------------------------------
+
+enum Role {
+  ADMIN
+  FACULTY
+  STUDENT
+}
+
+enum PlaceType {
+  CLASSROOM
+  LAB
+  TECHPARK
+  OFFICE
+  LIBRARY
+  WASHROOM
+  CANTEEN
+  FOOD_COURT
+  HOSTEL_BOYS
+  HOSTEL_GIRLS
+  GATE
+  PARKING
+}
+
+enum NodeKind {
+  JUNCTION
+  DOOR
+  STAIRS
+  LIFT
+  GATE
+  OUTDOOR
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+}
+
+enum ChangeStatus {
+  ACTIVE
+  CANCELLED
+}
+
+// -----------------------------------------------------------------------------
+// MAP & SPATIAL MODELS
+// -----------------------------------------------------------------------------
+
+model Building {
+  id          String   @id @default(uuid())
+  name        String
+  code        String   @unique
+  description String?
+  centerLat   Float
+  centerLng   Float
+  footprint   Json?    // GeoJSON Polygon
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  floors      Floor[]
+  places      Place[]
+
+  @@map("buildings")
+}
+
+model Floor {
+  id            String   @id @default(uuid())
+  buildingId    String   @map("building_id")
+  level         Int      // 0 = Ground, 1 = 1st Floor, etc.
+  name          String?  // e.g. "Ground Floor"
+  planImageUrl  String?  @map("plan_image_url")
+  scale         Float    @default(1.0)
+  originOffsetX Float    @default(0.0) @map("origin_offset_x")
+  originOffsetY Float    @default(0.0) @map("origin_offset_y")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  building      Building @relation(fields: [buildingId], references: [id], onDelete: Cascade)
+  places        Place[]
+  nodes         NavNode[]
+
+  @@unique([buildingId, level])
+  @@map("floors")
+}
+
+model Place {
+  id          String    @id @default(uuid())
+  name        String
+  code        String?   @unique
+  type        PlaceType
+  buildingId  String?   @map("building_id")
+  floorId     String?   @map("floor_id")
+  nodeId      String?   @map("node_id")
+  lat         Float
+  lng         Float
+  aliases     String[]  @default([])
+  tags        String[]  @default([])
+  openHours   Json?     @map("open_hours")
+  description String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  building    Building? @relation(fields: [buildingId], references: [id], onDelete: SetNull)
+  floor       Floor?    @relation(fields: [floorId], references: [id], onDelete: SetNull)
+  node        NavNode?  @relation(fields: [nodeId], references: [id], onDelete: SetNull)
+
+  timetableSlots     TimetableSlot[]
+  timetableChanges   TimetableChange[] @relation("NewPlaceTimetableChanges")
+  examHalls          ExamHall[]
+  examHallChangesOld ExamHallChange[]  @relation("OldPlaceExamHallChanges")
+  examHallChangesNew ExamHallChange[]  @relation("NewPlaceExamHallChanges")
+
+  @@index([name])
+  @@map("places")
+}
+
+model NavNode {
+  id        String   @id @default(uuid())
+  floorId   String?  @map("floor_id")
+  lat       Float
+  lng       Float
+  x         Float    @default(0) // Local cartesian projection coordinate X (meters)
+  y         Float    @default(0) // Local cartesian projection coordinate Y (meters)
+  kind      NodeKind
+  label     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  floor     Floor?    @relation(fields: [floorId], references: [id], onDelete: SetNull)
+  places    Place[]
+
+  outgoingEdges NavEdge[] @relation("FromNodeEdges")
+  incomingEdges NavEdge[] @relation("ToNodeEdges")
+
+  @@map("nav_nodes")
+}
+
+model NavEdge {
+  id           String   @id @default(uuid())
+  fromNodeId   String   @map("from_node")
+  toNodeId     String   @map("to_node")
+  distanceM    Float    @map("distance_m")
+  isAccessible Boolean  @default(true) @map("is_accessible")
+  isIndoor     Boolean  @default(false) @map("is_indoor")
+  oneWay       Boolean  @default(false) @map("one_way")
+  landmarkText String?  @map("landmark_text")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  fromNode     NavNode  @relation("FromNodeEdges", fields: [fromNodeId], references: [id], onDelete: Cascade)
+  toNode       NavNode  @relation("ToNodeEdges", fields: [toNodeId], references: [id], onDelete: Cascade)
+
+  @@index([fromNodeId])
+  @@index([toNodeId])
+  @@map("nav_edges")
+}
+
+// -----------------------------------------------------------------------------
+// ACADEMIC & USER MODELS
+// -----------------------------------------------------------------------------
+
+model Department {
+  id        String   @id @default(uuid())
+  name      String
+  code      String   @unique // e.g. "CSE", "IT", "ECE"
+  createdAt DateTime @default(now()) @map("created_at")
+
+  users          User[]
+  subjects       Subject[]
+  timetableSlots TimetableSlot[]
+
+  @@map("departments")
+}
+
+model Subject {
+  id           String     @id @default(uuid())
+  name         String
+  code         String     @unique // e.g. "CS8492"
+  departmentId String     @map("department_id")
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  timetableSlots TimetableSlot[]
+
+  @@map("subjects")
+}
+
+model User {
+  id           String      @id @default(uuid())
+  name         String
+  email        String      @unique
+  passwordHash String      @map("password_hash")
+  role         Role        @default(STUDENT)
+  departmentId String?     @map("department_id")
+  year         Int?
+  section      String?
+  rollNo       String?     @unique @map("roll_no")
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+
+  department   Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+
+  deviceTokens         DeviceToken[]
+  notificationReceipts NotificationReceipt[]
+  timetableSlots       TimetableSlot[]
+  createdTimetableChanges TimetableChange[]  @relation("TimetableChangesCreatedBy")
+  examHalls            ExamHall[]
+  createdExamChanges   ExamHallChange[]      @relation("ExamChangesCreatedBy")
+  announcements        Announcement[]
+  feedback             Feedback[]
+  auditLogs            AuditLog[]
+
+  @@index([email])
+  @@index([rollNo])
+  @@map("users")
+}
+
+model DeviceToken {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  fcmToken  String   @unique @map("fcm_token")
+  platform  String   @default("web") // "web", "android", "ios"
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("device_tokens")
+}
+
+model TimetableSlot {
+  id           String     @id @default(uuid())
+  departmentId String     @map("department_id")
+  year         Int
+  section      String
+  day          DayOfWeek
+  period       Int
+  startTime    String     @map("start_time") // "09:00"
+  endTime      String     @map("end_time")   // "09:50"
+  subjectId    String     @map("subject_id")
+  facultyId    String     @map("faculty_id")
+  placeId      String     @map("place_id")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  subject      Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  faculty      User       @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  place        Place      @relation(fields: [placeId], references: [id], onDelete: Cascade)
+
+  changes      TimetableChange[]
+
+  @@index([departmentId, year, section, day])
+  @@map("timetable_slots")
+}
+
+model TimetableChange {
+  id            String       @id @default(uuid())
+  slotId        String       @map("slot_id")
+  newPlaceId    String       @map("new_place_id")
+  newStart      String?      @map("new_start")
+  newEnd        String?      @map("new_end")
+  effectiveDate DateTime     @map("effective_date")
+  reason        String
+  status        ChangeStatus @default(ACTIVE)
+  createdBy     String       @map("created_by")
+  createdAt     DateTime     @default(now()) @map("created_at")
+
+  slot          TimetableSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  newPlace      Place         @relation("NewPlaceTimetableChanges", fields: [newPlaceId], references: [id], onDelete: Cascade)
+  creator       User          @relation("TimetableChangesCreatedBy", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@index([slotId])
+  @@map("timetable_changes")
+}
+
+model Exam {
+  id        String   @id @default(uuid())
+  name      String   // e.g. "Semester End Examination - April 2026"
+  examDate  DateTime @map("exam_date")
+  session   String   // "FN" or "AN"
+  startTime String   @map("start_time") // "10:00"
+  endTime   String   @map("end_time")   // "13:00"
+  createdAt DateTime @default(now()) @map("created_at")
+
+  halls     ExamHall[]
+
+  @@map("exams")
+}
+
+model ExamHall {
+  id            String   @id @default(uuid())
+  examId        String   @map("exam_id")
+  placeId       String   @map("place_id")
+  rollFrom      String   @map("roll_from") // e.g. "714021104001"
+  rollTo        String   @map("roll_to")   // e.g. "714021104030"
+  invigilatorId String?  @map("invigilator_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  exam          Exam     @relation(fields: [examId], references: [id], onDelete: Cascade)
+  place         Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  invigilator   User?    @relation(fields: [invigilatorId], references: [id], onDelete: SetNull)
+
+  changes       ExamHallChange[]
+
+  @@index([examId])
+  @@map("exam_halls")
+}
+
+model ExamHallChange {
+  id         String   @id @default(uuid())
+  examHallId String   @map("exam_hall_id")
+  oldPlaceId String   @map("old_place_id")
+  newPlaceId String   @map("new_place_id")
+  reason     String
+  createdBy  String   @map("created_by")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  examHall   ExamHall @relation(fields: [examHallId], references: [id], onDelete: Cascade)
+  oldPlace   Place    @relation("OldPlaceExamHallChanges", fields: [oldPlaceId], references: [id], onDelete: Cascade)
+  newPlace   Place    @relation("NewPlaceExamHallChanges", fields: [newPlaceId], references: [id], onDelete: Cascade)
+  creator    User     @relation("ExamChangesCreatedBy", fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@index([examHallId])
+  @@map("exam_hall_changes")
+}
+
+// -----------------------------------------------------------------------------
+// NOTIFICATIONS & AUDIT
+// -----------------------------------------------------------------------------
+
+model Notification {
+  id        String   @id @default(uuid())
+  type      String   // "TIMETABLE_CHANGE", "EXAM_HALL_CHANGE", "ANNOUNCEMENT"
+  title     String
+  body      String
+  payload   Json?
+  audience  Json?    // { departmentId, year, section } or { rollFrom, rollTo }
+  createdAt DateTime @default(now()) @map("created_at")
+
+  receipts  NotificationReceipt[]
+
+  @@map("notifications")
+}
+
+model NotificationReceipt {
+  id             String    @id @default(uuid())
+  notificationId String    @map("notification_id")
+  userId         String    @map("user_id")
+  deliveredAt    DateTime  @default(now()) @map("delivered_at")
+  readAt         DateTime? @map("read_at")
+
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([notificationId, userId])
+  @@map("notification_receipts")
+}
+
+model Announcement {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  category  String   @default("general") // "academic", "events", "facility"
+  authorId  String   @map("author_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("announcements")
+}
+
+model Feedback {
+  id        String   @id @default(uuid())
+  userId    String?  @map("user_id")
+  type      String   @default("navigation")
+  comment   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("feedback")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?  @map("user_id")
+  action     String   // e.g. "TIMETABLE_RELOCATION", "MAP_EDGE_MODIFIED"
+  entityType String   @map("entity_type")
+  entityId   String?  @map("entity_id")
+  changes    Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}

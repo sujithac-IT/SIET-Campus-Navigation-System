@@ -1,5 +1,9 @@
 # dependencies
 /node_modules
+server/node_modules
+client/node_modules
+.cache
+.vite
 /.pnp
 .pnp.js
 
@@ -12,6 +16,8 @@
 
 # production
 /build
+/dist
+server/dist
 
 # debug
 npm-debug.log*
