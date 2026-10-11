@@ -10,6 +10,9 @@ import { authRoutes } from './modules/auth/auth.routes.js';
 import { placesRoutes } from './modules/places/places.routes.js';
 import { buildingsRoutes } from './modules/places/buildings.routes.js';
 import { routingRoutes } from './modules/routing/routing.routes.js';
+import { timetableRoutes } from './modules/timetable/timetable.routes.js';
+import { examsRoutes } from './modules/exams/exams.routes.js';
+import { notificationsRoutes, devicesRoutes } from './modules/notifications/notifications.routes.js';
 import { setupSwagger } from './core/swagger.js';
 
 export function createApp(): Express {
@@ -59,6 +62,10 @@ export function createApp(): Express {
   app.use('/api/v1/buildings', buildingsRoutes);
   app.use('/api/v1/route', routingRoutes);
   app.use('/route', routingRoutes);
+  app.use('/api/v1/timetable', timetableRoutes);
+  app.use('/api/v1/exams', examsRoutes);
+  app.use('/api/v1/notifications', notificationsRoutes);
+  app.use('/api/v1/devices', devicesRoutes);
 
   // 404 Not Found Handler
   app.use((req: Request, _res: Response, next: NextFunction) => {

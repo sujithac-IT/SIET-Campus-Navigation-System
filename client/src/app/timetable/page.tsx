@@ -21,13 +21,18 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+import { ExamHallLookup } from '@/components/search/ExamHallLookup';
+import { Sparkles, Radio } from 'lucide-react';
+
 export default function TimetablePage() {
   const store = useCampusStore();
   const router = useRouter();
   const currentUser = store.currentUser;
   
+  const [mainTab, setMainTab] = useState<'classes' | 'exams'>('classes');
   const [activeDay, setActiveDay] = useState<'Today' | 'Tomorrow'>('Today');
   const [timeLeftStr, setTimeLeftStr] = useState('14:59');
+  const [isSimulatingRelocation, setIsSimulatingRelocation] = useState(false);
 
   // Live class countdown timer simulation
   useEffect(() => {
@@ -45,6 +50,17 @@ export default function TimetablePage() {
 
     return () => clearInterval(interval);
   }, []);
+
+  const handleSimulateRelocation = () => {
+    setIsSimulatingRelocation(true);
+    store.triggerClassroomReassignment({
+      subject: 'Data Structures & Algorithms',
+      oldRoomCode: 'LH25',
+      newRoomCode: 'TECH-101',
+      reason: 'Server Infrastructure & High Performance Computing Lab Session',
+    });
+    setTimeout(() => setIsSimulatingRelocation(false), 800);
+  };
 
   // Filter timetable slots
   const getTimetableSlots = () => {
@@ -84,12 +100,12 @@ export default function TimetablePage() {
     
     if (currentUser.role === 'student') {
       return {
-        subject: 'Computer Networks',
-        roomCode: 'LH25',
+        subject: 'Data Structures & Algorithms',
+        roomCode: 'TECH-101',
         time: '11:00 AM',
-        faculty: 'Dr. Prakash',
-        building: 'Central Library Block (Floor 2)',
-        buildingId: 'b-library'
+        faculty: 'Dr. R. Meenakshi',
+        building: 'Tech Park Block (Floor 1)',
+        buildingId: 'b-techpark'
       };
     }
     
@@ -111,7 +127,7 @@ export default function TimetablePage() {
 
   const handleNavigate = (roomCode: string) => {
     store.startNavigationToRoom(roomCode);
-    router.push('/map');
+    router.push(`/navigate?to=${encodeURIComponent(roomCode)}`);
   };
 
   const getBuildingName = (buildingId: string) => {
@@ -142,68 +158,112 @@ export default function TimetablePage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 pb-12">
-      {/* Title */}
-      <div className="text-left space-y-1">
-        <h2 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
-          <Calendar className="w-6 h-6 text-sky-400" />
-          Academic Schedule Twin
-        </h2>
-        <p className="text-xs text-slate-400">
-          Your personal schedule linked to the Dijkstra map routing system. Tap any classroom to navigate directly.
-        </p>
-      </div>
-
-      {/* Next Class Highlight Panel */}
-      {nextClass && (
-        <section className="bg-gradient-to-r from-emerald-950/80 via-slate-900 to-slate-900 border border-emerald-500/30 rounded-3xl p-6 shadow-2xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-3 relative z-10">
-            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-wider border border-emerald-500/20">
-              <Clock className="w-3.5 h-3.5 text-emerald-400" />
-              Next Class starts in {timeLeftStr}
-            </span>
-            <div className="space-y-1">
-              <h3 className="text-xl font-black text-white">{nextClass.subject}</h3>
-              <p className="text-xs text-slate-300 flex items-center gap-1.5 font-semibold">
-                <MapPin className="w-4 h-4 text-emerald-400" />
-                <span>
-                  {nextClass.roomCode} — {nextClass.building} • Instructor: {nextClass.faculty}
-                </span>
-              </p>
-            </div>
-          </div>
-
-          <button
-            onClick={() => handleNavigate(nextClass.roomCode)}
-            className="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs shadow-lg shadow-emerald-600/30 transition flex items-center justify-center gap-2 shrink-0 border border-emerald-400/30"
-          >
-            <Navigation className="w-4 h-4 animate-pulse" />
-            <span>Navigate to Room</span>
-          </button>
-        </section>
-      )}
-
-      {/* Day Selectors */}
-      <div className="flex items-center justify-between border-b border-slate-800/60 pb-3">
-        <div className="flex gap-2 p-1 rounded-xl bg-slate-950 border border-slate-800 text-xs font-bold">
-          {(['Today', 'Tomorrow'] as const).map((day) => (
-            <button
-              key={day}
-              onClick={() => setActiveDay(day)}
-              className={`px-4 py-2 rounded-lg transition ${
-                activeDay === day ? 'bg-sky-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              {day}
-            </button>
-          ))}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 pb-12">
+      {/* Title & Real-time Broadcast Status */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="text-left space-y-1">
+          <h2 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
+            <Calendar className="w-6 h-6 text-cyan-400" />
+            Academic Schedule & Exam Allocator
+          </h2>
+          <p className="text-xs text-slate-400">
+            Real-time timetable synchronization with automated room change alerts and direct HUD navigation.
+          </p>
         </div>
 
-        <span className="text-[10px] text-slate-500 font-extrabold uppercase flex items-center gap-1.5">
-          <Info className="w-4 h-4 text-slate-600" />
-          Linked to SIET Digital Twin
-        </span>
+        {/* Live Broadcast Simulator Trigger */}
+        <button
+          onClick={handleSimulateRelocation}
+          disabled={isSimulatingRelocation}
+          className="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white text-xs font-black shadow-lg shadow-rose-950/40 transition flex items-center gap-2 border border-rose-400/40 shrink-0"
+        >
+          <Radio className="w-4 h-4 animate-pulse text-amber-200" />
+          <span>Simulate Live Relocation Alert</span>
+        </button>
       </div>
+
+      {/* Main Tab Switcher (Classes vs Exams) */}
+      <div className="flex gap-2 p-1.5 rounded-2xl bg-slate-900 border border-slate-800 text-xs font-bold max-w-md">
+        <button
+          onClick={() => setMainTab('classes')}
+          className={`flex-1 py-2.5 rounded-xl transition flex items-center justify-center gap-2 ${
+            mainTab === 'classes'
+              ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-black shadow-md'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Calendar className="w-4 h-4" />
+          <span>Weekly Timetable</span>
+        </button>
+        <button
+          onClick={() => setMainTab('exams')}
+          className={`flex-1 py-2.5 rounded-xl transition flex items-center justify-center gap-2 ${
+            mainTab === 'exams'
+              ? 'bg-gradient-to-r from-amber-500 to-rose-600 text-slate-950 font-black shadow-md'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <GraduationCap className="w-4 h-4" />
+          <span>Exam Hall Schedule</span>
+        </button>
+      </div>
+
+      {mainTab === 'exams' ? (
+        <section className="space-y-6 animate-in fade-in duration-200">
+          <ExamHallLookup />
+        </section>
+      ) : (
+        <>
+          {/* Next Class Highlight Panel */}
+          {nextClass && (
+            <section className="bg-gradient-to-r from-cyan-950/80 via-slate-900 to-blue-950/80 border border-cyan-500/30 rounded-3xl p-6 shadow-2xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-3 relative z-10">
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 text-[10px] font-black uppercase tracking-wider border border-cyan-500/20">
+                  <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                  Next Class starts in {timeLeftStr}
+                </span>
+                <div className="space-y-1">
+                  <h3 className="text-xl font-black text-white">{nextClass.subject}</h3>
+                  <p className="text-xs text-slate-300 flex items-center gap-1.5 font-semibold">
+                    <MapPin className="w-4 h-4 text-cyan-400" />
+                    <span>
+                      {nextClass.roomCode} — {nextClass.building} • Instructor: {nextClass.faculty}
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => handleNavigate(nextClass.roomCode)}
+                className="px-5 py-3 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs shadow-lg shadow-cyan-500/30 transition flex items-center justify-center gap-2 shrink-0 border border-cyan-300/40"
+              >
+                <Navigation className="w-4 h-4 animate-pulse" />
+                <span>Navigate to Room</span>
+              </button>
+            </section>
+          )}
+
+          {/* Day Selectors */}
+          <div className="flex items-center justify-between border-b border-slate-800/60 pb-3">
+            <div className="flex gap-2 p-1 rounded-xl bg-slate-950 border border-slate-800 text-xs font-bold">
+              {(['Today', 'Tomorrow'] as const).map((day) => (
+                <button
+                  key={day}
+                  onClick={() => setActiveDay(day)}
+                  className={`px-4 py-2 rounded-lg transition ${
+                    activeDay === day ? 'bg-cyan-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {day}
+                </button>
+              ))}
+            </div>
+
+            <span className="text-[10px] text-slate-500 font-extrabold uppercase flex items-center gap-1.5">
+              <Info className="w-4 h-4 text-slate-600" />
+              Linked to SIET Campus Map
+            </span>
+          </div>
 
       {/* Schedule Timeline Slots */}
       <div className="space-y-4 max-w-4xl">
@@ -294,6 +354,8 @@ export default function TimetablePage() {
           </div>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }

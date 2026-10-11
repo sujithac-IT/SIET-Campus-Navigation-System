@@ -230,6 +230,77 @@ export const api = {
     }
     return null;
   },
+
+  async getTimetableMe(): Promise<any[]> {
+    try {
+      const res = await fetch(`${API_BASE_URL}/timetable/me`, { cache: 'no-store' });
+      if (res.ok) {
+        const json = await res.json();
+        return json.data?.slots || [];
+      }
+    } catch {
+      // Fallback
+    }
+    return [];
+  },
+
+  async createClassroomChange(slotId: string, newPlaceId: string, reason: string): Promise<any> {
+    try {
+      const res = await fetch(`${API_BASE_URL}/timetable/changes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slotId, newPlaceId, reason }),
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch {
+      // Fallback
+    }
+    return null;
+  },
+
+  async getExamHall(rollNo?: string): Promise<any | null> {
+    try {
+      const url = rollNo
+        ? `${API_BASE_URL}/exams/my-hall?rollNo=${encodeURIComponent(rollNo)}`
+        : `${API_BASE_URL}/exams/my-hall`;
+      const res = await fetch(url, { cache: 'no-store' });
+      if (res.ok) {
+        const json = await res.json();
+        return json.data?.hall || null;
+      }
+    } catch {
+      // Fallback
+    }
+    return null;
+  },
+
+  async getNotifications(): Promise<any[]> {
+    try {
+      const res = await fetch(`${API_BASE_URL}/notifications`, { cache: 'no-store' });
+      if (res.ok) {
+        const json = await res.json();
+        return json.data?.notifications || [];
+      }
+    } catch {
+      // Fallback
+    }
+    return [];
+  },
+
+  async registerDeviceToken(fcmToken: string, platform = 'web'): Promise<boolean> {
+    try {
+      const res = await fetch(`${API_BASE_URL}/devices/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fcmToken, platform }),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  },
 };
 
 export const apiClient = api;

@@ -180,7 +180,7 @@ export interface NotificationItem {
   roleTarget?: UserRole | 'all';
   title: string;
   message: string;
-  type: 'info' | 'class_change' | 'status_update' | 'emergency' | 'event';
+  type: 'info' | 'class_change' | 'status_update' | 'emergency' | 'event' | 'exam_alert';
   priority?: NotificationPriority;
   impactAnalysis?: AIImpactAnalysis;
   actionRoomCode?: string;

@@ -327,6 +327,122 @@ export const openApiSpec = {
         },
       },
     },
+    '/api/v1/timetable/me': {
+      get: {
+        summary: 'Get weekly timetable for authenticated student or faculty',
+        tags: ['Timetable'],
+        responses: {
+          '200': { description: 'Timetable slots with active changes' },
+        },
+      },
+    },
+    '/api/v1/timetable/changes': {
+      get: {
+        summary: 'Get list of active classroom relocation changes',
+        tags: ['Timetable'],
+        responses: {
+          '200': { description: 'Active timetable changes' },
+        },
+      },
+      post: {
+        summary: 'Relocate classroom and broadcast real-time alert',
+        tags: ['Timetable'],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['slotId', 'newPlaceId', 'reason'],
+                properties: {
+                  slotId: { type: 'string', example: 'slot-cse-mon-1' },
+                  newPlaceId: { type: 'string', example: 'p-tech-lab3' },
+                  reason: { type: 'string', example: 'Project Demo & Lab Equipment Setup' },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '201': { description: 'Classroom relocated and broadcast emitted' },
+        },
+      },
+    },
+    '/api/v1/exams/my-hall': {
+      get: {
+        summary: 'Lookup student exam hall allocation by roll number',
+        tags: ['Exams'],
+        parameters: [
+          {
+            name: 'rollNo',
+            in: 'query',
+            schema: { type: 'string', example: '714021104012' },
+            description: 'Student Anna University Register / Roll Number',
+          },
+        ],
+        responses: {
+          '200': { description: 'Exam hall allocation details' },
+        },
+      },
+    },
+    '/api/v1/exams/hall-changes': {
+      post: {
+        summary: 'Shift exam hall and trigger real-time alert to students',
+        tags: ['Exams'],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['examHallId', 'newPlaceId', 'reason'],
+                properties: {
+                  examHallId: { type: 'string', example: 'hall-cs-lh01' },
+                  newPlaceId: { type: 'string', example: 'p-tech-lab3' },
+                  reason: { type: 'string', example: 'Air Conditioning maintenance' },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '201': { description: 'Exam hall shifted and alerts sent' },
+        },
+      },
+    },
+    '/api/v1/notifications': {
+      get: {
+        summary: 'Retrieve user notification center alerts',
+        tags: ['Notifications'],
+        responses: {
+          '200': { description: 'List of alerts and unread count' },
+        },
+      },
+    },
+    '/api/v1/devices/register': {
+      post: {
+        summary: 'Register FCM device token for background push alerts',
+        tags: ['Notifications'],
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['fcmToken'],
+                properties: {
+                  fcmToken: { type: 'string', example: 'fcm-sample-token-abc123xyz' },
+                  platform: { type: 'string', enum: ['web', 'android', 'ios'], default: 'web' },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': { description: 'Device token registered' },
+        },
+      },
+    },
   },
 };
 

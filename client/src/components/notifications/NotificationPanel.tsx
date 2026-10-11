@@ -28,14 +28,24 @@ export const NotificationPanel: React.FC = () => {
         <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-slate-900/95 backdrop-blur-2xl border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden z-50 animate-in slide-in-from-top-3 duration-200">
           <div className="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
             <h4 className="font-bold text-sm text-slate-100 flex items-center gap-2">
-              <Bell className="w-4 h-4 text-sky-400" /> Notifications & Alerts
+              <Bell className="w-4 h-4 text-cyan-400" /> Notifications & Alerts
             </h4>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="p-1 rounded-lg text-slate-400 hover:text-white"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-2">
+              {unreadCount > 0 && (
+                <button
+                  onClick={() => store.markAllNotificationsAsRead()}
+                  className="text-[10px] text-cyan-400 hover:text-cyan-300 font-semibold"
+                >
+                  Mark all read
+                </button>
+              )}
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           <div className="max-h-80 overflow-y-auto divide-y divide-slate-800/80 custom-scrollbar">
@@ -50,8 +60,8 @@ export const NotificationPanel: React.FC = () => {
                 <div className="mt-0.5">
                   {notif.type === 'emergency' ? (
                     <AlertTriangle className="w-4 h-4 text-rose-500" />
-                  ) : notif.type === 'class_change' ? (
-                    <Navigation className="w-4 h-4 text-amber-400" />
+                  ) : notif.type === 'class_change' || notif.type === 'exam_alert' ? (
+                    <Navigation className="w-4 h-4 text-amber-400 animate-pulse" />
                   ) : (
                     <Info className="w-4 h-4 text-sky-400" />
                   )}
@@ -61,7 +71,19 @@ export const NotificationPanel: React.FC = () => {
                   <p className="text-[11px] text-slate-300 mt-0.5 leading-relaxed">
                     {notif.message}
                   </p>
-                  <span className="text-[9px] text-slate-500 mt-1 block">{notif.timestamp}</span>
+                  <div className="flex items-center justify-between mt-2">
+                    <span className="text-[9px] text-slate-500">{notif.timestamp}</span>
+                    {(notif.actionRoomCode || notif.link) && (
+                      <a
+                        href={notif.link || `/navigate?to=${encodeURIComponent(notif.actionRoomCode || '')}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 hover:bg-cyan-500 hover:text-slate-950 text-[10px] font-bold transition shadow-sm"
+                      >
+                        <Navigation className="w-3 h-3" />
+                        <span>Navigate</span>
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}

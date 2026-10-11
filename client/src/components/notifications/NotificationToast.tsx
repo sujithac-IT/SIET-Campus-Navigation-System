@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useCampusStore } from '@/lib/store/useCampusStore';
 import { useRouter } from 'next/navigation';
+import { campusSocket } from '@/lib/socket';
 import { Bell, Navigation, ArrowRight, X, AlertTriangle, Clock, MapPin } from 'lucide-react';
 
 export const NotificationToast: React.FC = () => {
@@ -10,13 +11,17 @@ export const NotificationToast: React.FC = () => {
   const router = useRouter();
   const toast = store.latestPushToast;
 
+  useEffect(() => {
+    campusSocket.connect();
+  }, []);
+
   if (!toast) return null;
 
   const handleNavigate = (roomCode?: string) => {
     const targetRoom = roomCode || toast.actionRoomCode || toast.impactAnalysis?.newRoomCode || 'LH-28';
     store.startNavigationToRoom(targetRoom);
     store.clearPushToast();
-    router.push(`/map?navigate=${encodeURIComponent(targetRoom)}`);
+    router.push(`/navigate?to=${encodeURIComponent(targetRoom)}`);
   };
 
   const handleViewDetails = () => {

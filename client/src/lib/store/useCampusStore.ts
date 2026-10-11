@@ -418,6 +418,11 @@ class GlobalState {
     this.notify();
   }
 
+  public markAllNotificationsAsRead() {
+    this.notifications = this.notifications.map((n) => ({ ...n, isRead: true }));
+    this.notify();
+  }
+
   public registerForEvent(eventId: string) {
     this.events = this.events.map((ev) => (ev.id === eventId ? { ...ev, registeredCount: ev.registeredCount + 1 } : ev));
     this.notify();
