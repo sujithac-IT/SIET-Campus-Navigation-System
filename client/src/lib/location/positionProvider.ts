@@ -126,30 +126,71 @@ export class QRPositionProvider implements IPositionProvider {
 
   public parseAndScan(payloadString: string): PositionState | null {
     try {
+      // 1. Try URL scheme format (e.g. sietnav://pos?node=... or https://...)
+      if (payloadString.startsWith('sietnav://') || payloadString.startsWith('http')) {
+        const urlObj = new URL(payloadString.replace('sietnav://', 'https://siet.ac.in/'));
+        const nodeId = urlObj.searchParams.get('node') || 'n-gate-main';
+        const buildingId = urlObj.searchParams.get('building') || 'b-gate';
+        const floor = parseInt(urlObj.searchParams.get('floor') || '0', 10);
+        const x = parseFloat(urlObj.searchParams.get('x') || '15');
+        const y = parseFloat(urlObj.searchParams.get('y') || '88');
+
+        const position: PositionState = {
+          coordinates: { x, y },
+          buildingId,
+          floor,
+          nodeId,
+          accuracyMeters: 1,
+          providerType: 'qr_checkpoint',
+          timestamp: new Date().toLocaleTimeString(),
+        };
+        if (this.callback) this.callback(position);
+        return position;
+      }
+
+      // 2. Try JSON payload format
       const data: QRPayload = JSON.parse(payloadString);
-      if (data.type !== 'campus_position_checkpoint') {
-        throw new Error('Invalid QR payload type');
-      }
+      if (data.type === 'campus_position_checkpoint') {
+        const position: PositionState = {
+          coordinates: data.coordinates,
+          buildingId: data.buildingId,
+          floor: data.floorId,
+          nodeId: data.nodeId,
+          accuracyMeters: 1,
+          providerType: 'qr_checkpoint',
+          timestamp: new Date().toLocaleTimeString(),
+        };
 
-      const position: PositionState = {
-        coordinates: data.coordinates,
-        buildingId: data.buildingId,
-        floor: data.floorId,
-        nodeId: data.nodeId,
-        accuracyMeters: 1, // QR scan provides exact checkpoint position (1m precision)
-        providerType: 'qr_checkpoint',
-        timestamp: new Date().toLocaleTimeString()
+        if (this.callback) {
+          this.callback(position);
+        }
+        return position;
+      }
+    } catch {
+      // Fallback: check if plain ID matches checkpoint mapping
+      const mapping: Record<string, { x: number; y: number; building: string; floor: number }> = {
+        'n-gate-main': { x: 15, y: 88, building: 'b-gate', floor: 0 },
+        'SIET-QR-GATE': { x: 15, y: 88, building: 'b-gate', floor: 0 },
+        'SIET-QR-LH25': { x: 35, y: 55, building: 'b-lib', floor: 2 },
+        'SIET-QR-TECHPARK': { x: 75, y: 25, building: 'b-techpark', floor: 1 },
+        'SIET-QR-CANTEEN': { x: 45, y: 75, building: 'b-canteen', floor: 0 },
       };
-
-      if (this.callback) {
-        this.callback(position);
+      const found = mapping[payloadString];
+      if (found) {
+        const pos: PositionState = {
+          coordinates: { x: found.x, y: found.y },
+          buildingId: found.building,
+          floor: found.floor,
+          nodeId: payloadString,
+          accuracyMeters: 1,
+          providerType: 'qr_checkpoint',
+          timestamp: new Date().toLocaleTimeString(),
+        };
+        if (this.callback) this.callback(pos);
+        return pos;
       }
-
-      return position;
-    } catch (e) {
-      console.error('Failed to parse QR position payload:', e);
-      return null;
     }
+    return null;
   }
 
   public getCurrentPosition(): Promise<PositionState> {

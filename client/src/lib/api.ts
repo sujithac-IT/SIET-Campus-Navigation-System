@@ -231,3 +231,5 @@ export const api = {
     return null;
   },
 };
+
+export const apiClient = api;

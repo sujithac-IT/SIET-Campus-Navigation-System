@@ -106,6 +106,17 @@ export const NavigationRoute: React.FC<NavigationRouteProps> = ({ route, onClear
             </div>
           ))}
         </div>
+
+        {/* Launch Full Turn-by-Turn Game HUD Mode CTA */}
+        <div className="mt-3 pt-3 border-t border-slate-800">
+          <a
+            href="/navigate"
+            className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/25 transition"
+          >
+            <Navigation className="w-4 h-4" />
+            <span>Launch Game HUD & Voice Mode</span>
+          </a>
+        </div>
       </div>
     </>
   );

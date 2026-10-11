@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import { QRPositionProvider, QRPayload } from '@/lib/location/positionProvider';
 import { globalState } from '@/lib/store/useCampusStore';
+import { deadReckoning } from '@/lib/location/deadReckoning';
+import { voiceGuidance } from '@/lib/speech/voiceGuidance';
 import { QrCode, Camera, CheckCircle2, MapPin, X, Sparkles, Building2, ShieldCheck } from 'lucide-react';
 
 interface QRScannerModalProps {
@@ -84,6 +86,12 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({ isOpen, onClose 
       if (posState.floor !== undefined) {
         globalState.setFloor(posState.floor);
       }
+
+      // Calibrate dead reckoning and announce via voice
+      deadReckoning.calibratePosition(posState.coordinates);
+      voiceGuidance.speak(
+        `Position calibrated to ${checkpoint.roomCode || 'campus checkpoint'}, Floor ${posState.floor}.`
+      );
 
       setScannedResult(
         `Checkpoint Verified! Located at ${checkpoint.roomCode || 'Building Node'} (${posState.buildingId}, Floor ${posState.floor})`
