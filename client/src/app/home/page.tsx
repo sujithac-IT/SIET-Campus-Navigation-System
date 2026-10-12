@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import { CampusMap } from '@/components/map/CampusMap';
 import { GlobalSearch } from '@/components/search/GlobalSearch';
 import { ExamHallLookup } from '@/components/search/ExamHallLookup';
-import { CampusAIBot } from '@/components/ai/CampusAIBot';
 import { PrivacyToggle } from '@/components/privacy/PrivacyToggle';
 import { ConstellationBackground } from '@/components/layout/ConstellationBackground';
 import { NextClassIntelligence } from '@/components/student/NextClassIntelligence';
@@ -619,9 +618,6 @@ export default function LandingPage() {
           </div>
         </main>
       </div>
-
-      {/* Floating AI Assistant Bot */}
-      <CampusAIBot />
 
       {/* Google-Style Footer */}
       <footer className="relative z-10 border-t border-slate-800/80 bg-[#060910] py-8 text-center text-xs text-slate-400 space-y-2">

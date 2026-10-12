@@ -10,7 +10,6 @@ import { CampusEvents } from '@/components/events/CampusEvents';
 import { PrivacyToggle } from '@/components/privacy/PrivacyToggle';
 import { NotificationPanel } from '@/components/notifications/NotificationPanel';
 import { EmergencyButton } from '@/components/emergency/EmergencyModal';
-import { CampusAIBot } from '@/components/ai/CampusAIBot';
 import { ExamHallLookup } from '@/components/search/ExamHallLookup';
 import {
   GraduationCap,
@@ -351,8 +350,6 @@ export default function StudentDashboard() {
         {activeTab === 'students' && <StudentFinder />}
         {activeTab === 'events' && <CampusEvents />}
       </main>
-
-      <CampusAIBot />
     </div>
   );
 }

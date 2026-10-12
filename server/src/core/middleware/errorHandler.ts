@@ -1,14 +1,29 @@
 import { Request, Response, NextFunction } from 'express';
+import { ZodError } from 'zod';
 import { AppError } from '../errors.js';
 import { logger } from '../logger.js';
 
 export function errorHandler(
-  err: Error | AppError,
+  err: Error | AppError | ZodError,
   req: Request,
   res: Response,
   _next: NextFunction
 ): void {
   void _next;
+
+  if (err instanceof ZodError) {
+    logger.warn(`[Validation Error 400] ${req.method} ${req.originalUrl}:`, err.flatten());
+    res.status(400).json({
+      success: false,
+      error: {
+        message: 'Validation failed',
+        statusCode: 400,
+        details: err.errors,
+      },
+    });
+    return;
+  }
+
   const isAppError = err instanceof AppError;
   const statusCode = isAppError ? err.statusCode : 500;
   const message = isAppError ? err.message : 'Internal Server Error';

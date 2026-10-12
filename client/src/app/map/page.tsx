@@ -9,7 +9,6 @@ import { CategoryFilterChips } from '@/components/map/CategoryFilterChips';
 import { PrivacyToggle } from '@/components/privacy/PrivacyToggle';
 import { EmergencyButton } from '@/components/emergency/EmergencyModal';
 import { NotificationPanel } from '@/components/notifications/NotificationPanel';
-import { CampusAIBot } from '@/components/ai/CampusAIBot';
 import { Compass, ArrowLeft, Sparkles, Navigation, X } from 'lucide-react';
 
 function VisitorBanner() {
@@ -103,9 +102,6 @@ export default function MapPage() {
           <PrivacyToggle />
         </div>
       </main>
-
-      {/* Floating AI Voice Navigator */}
-      <CampusAIBot />
     </div>
   );
 }

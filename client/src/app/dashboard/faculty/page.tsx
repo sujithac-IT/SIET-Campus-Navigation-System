@@ -7,7 +7,6 @@ import { CampusMap } from '@/components/map/CampusMap';
 import { PrivacyToggle } from '@/components/privacy/PrivacyToggle';
 import { NotificationPanel } from '@/components/notifications/NotificationPanel';
 import { EmergencyButton } from '@/components/emergency/EmergencyModal';
-import { CampusAIBot } from '@/components/ai/CampusAIBot';
 import { FacultyUser, AvailabilityStatus } from '@/types';
 import {
   Shield,
@@ -369,8 +368,6 @@ export default function FacultyDashboard() {
           </div>
         </div>
       </main>
-
-      <CampusAIBot />
     </div>
   );
 }

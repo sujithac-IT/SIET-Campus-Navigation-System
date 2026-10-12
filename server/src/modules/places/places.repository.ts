@@ -154,8 +154,9 @@ export class PlacesRepository {
         (p) =>
           p.name.toLowerCase().includes(q) ||
           p.code?.toLowerCase().includes(q) ||
-          p.aliases.some((al) => al.toLowerCase().includes(q)) ||
-          p.tags.some((t) => t.toLowerCase().includes(q))
+          p.aliases.some((al) => al.toLowerCase().includes(q) || q.includes(al.toLowerCase())) ||
+          p.tags.some((t) => t.toLowerCase().includes(q) || q.includes(t.toLowerCase())) ||
+          (p.building?.name && (p.building.name.toLowerCase().includes(q) || q.includes(p.building.name.toLowerCase())))
       );
     }
     return results.slice(0, limit);

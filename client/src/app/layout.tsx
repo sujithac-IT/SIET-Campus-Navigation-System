@@ -4,6 +4,7 @@ import { Navbar } from '@/components/layout/Navbar';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { OfflineIndicator } from '@/components/layout/OfflineIndicator';
 import { NotificationToast } from '@/components/notifications/NotificationToast';
+import { CampusAIBot } from '@/components/ai/CampusAIBot';
 import Script from 'next/script';
 
 export const metadata: Metadata = {
@@ -38,6 +39,7 @@ export default function RootLayout({
         <main className="flex-1 w-full">
           {children}
         </main>
+        <CampusAIBot />
         <OfflineIndicator />
         <MobileNav />
 
