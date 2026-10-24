@@ -4,7 +4,7 @@
 
 import { Router } from 'express';
 import { timetableController } from './timetable.controller.js';
-import { optionalAuth, authenticateToken, requireRole } from '../../core/middleware/auth.middleware.js';
+import { optionalAuth } from '../../core/middleware/auth.middleware.js';
 
 export const timetableRoutes = Router();
 

@@ -2,19 +2,23 @@ import Redis from 'ioredis';
 import { config } from './config.js';
 import { logger } from './logger.js';
 
+export const redisClient = new Redis(config.REDIS_URL, {
+  maxRetriesPerRequest: null,
+  retryStrategy: () => null, // don't spam reconnects if offline
+  lazyConnect: true,
+});
+
+redisClient.on('error', () => {
+  // Silent catch offline errors
+});
+
 class CacheManager {
-  private redis: Redis | null = null;
+  private redis: Redis = redisClient;
   private memoryCache = new Map<string, { value: string; expiresAt: number }>();
   private isRedisConnected = false;
 
   constructor() {
     try {
-      this.redis = new Redis(config.REDIS_URL, {
-        maxRetriesPerRequest: 1,
-        retryStrategy: () => null, // don't spam reconnects if offline
-        lazyConnect: true,
-      });
-
       this.redis
         .connect()
         .then(() => {
@@ -25,10 +29,6 @@ class CacheManager {
           this.isRedisConnected = false;
           logger.debug('Redis unreachable. Operating with in-memory cache fallback.');
         });
-
-      this.redis.on('error', () => {
-        this.isRedisConnected = false;
-      });
     } catch {
       this.isRedisConnected = false;
     }

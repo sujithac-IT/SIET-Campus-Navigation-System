@@ -33,7 +33,7 @@ export class ExamsController {
     }
   }
 
-  public async getAllExams(req: Request, res: Response, next: NextFunction): Promise<void> {
+  public async getAllExams(_req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const exams = await examsService.getAllExams();
       res.status(200).json({

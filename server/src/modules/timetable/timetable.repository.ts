@@ -356,7 +356,7 @@ export class TimetableRepository {
     };
     this.inMemoryChanges.unshift(memRecord);
 
-    const slot = FALLBACK_SLOTS.find((s) => s.id === data.slotId) || FALLBACK_SLOTS[0];
+    const slot = FALLBACK_SLOTS.find((s) => s.id === data.slotId) || FALLBACK_SLOTS[0]!;
     return {
       id: memRecord.id,
       slotId: data.slotId,

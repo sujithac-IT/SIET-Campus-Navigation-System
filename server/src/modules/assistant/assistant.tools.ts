@@ -133,8 +133,8 @@ export class AssistantToolsExecutor {
         building: p.building?.name || 'Campus Grounds',
         floor: p.floor?.level ?? 0,
         description: p.description,
-        lat: p.latitude,
-        lng: p.longitude,
+        lat: (p as any).lat ?? (p as any).latitude ?? 0,
+        lng: (p as any).lng ?? (p as any).longitude ?? 0,
       }));
 
       return {
@@ -184,8 +184,8 @@ export class AssistantToolsExecutor {
         distance_m: routeData.distance_m,
         eta_sec: routeData.eta_sec,
         stepsCount: routeData.steps.length,
-        summary: `Walk ${routeData.distance_m}m (approx ${Math.ceil(routeData.eta_sec / 60)} min). First step: ${routeData.steps[0]?.instruction || 'Proceed straight'}.`,
-        firstStep: routeData.steps[0]?.instruction,
+        summary: `Walk ${routeData.distance_m}m (approx ${Math.ceil(routeData.eta_sec / 60)} min). First step: ${routeData.steps[0]?.text || 'Proceed straight'}.`,
+        firstStep: routeData.steps[0]?.text,
         destinationPlace: {
           id: routeData.to.id,
           name: routeData.to.name,
@@ -203,7 +203,7 @@ export class AssistantToolsExecutor {
   /**
    * Retrieve upcoming class timetable
    */
-  public static async executeGetNextClass(rollNo = '714022104045', department = 'CSE', year = 3, section = 'A') {
+  public static async executeGetNextClass(_rollNo = '714022104045', department = 'CSE', year = 3, section = 'A') {
     try {
       const slots = await timetableService.getMyTimetable({
         departmentCode: department,
@@ -229,7 +229,7 @@ export class AssistantToolsExecutor {
         facultyName: nextSlot.facultyName,
         startTime: nextSlot.startTime,
         endTime: nextSlot.endTime,
-        dayOfWeek: nextSlot.dayOfWeek,
+        dayOfWeek: nextSlot.day,
         placeId: nextSlot.placeId,
         placeName: nextSlot.placeName,
         buildingName: nextSlot.buildingName,

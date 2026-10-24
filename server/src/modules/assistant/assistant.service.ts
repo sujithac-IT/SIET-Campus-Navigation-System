@@ -118,11 +118,11 @@ export class AssistantService {
         toolInput.from = from;
       }
 
-      const output = await AssistantToolsExecutor.callTool(toolName, toolInput);
+      const output: any = await AssistantToolsExecutor.callTool(toolName, toolInput);
       toolCalls.push({ name: toolName, input: toolInput, output });
 
       // Detect action from tool output
-      if (toolName === 'get_route' && output.success) {
+      if (toolName === 'get_route' && output.success && output.to && output.from) {
         detectedAction = {
           type: 'start_navigation',
           destination: {
@@ -252,8 +252,8 @@ export class AssistantService {
         action = {
           type: 'start_navigation',
           destination: {
-            id: classData.placeId,
-            name: classData.placeName,
+            id: classData.placeId || 'b-main',
+            name: classData.placeName || 'Classroom',
             building: classData.buildingName,
             floorLevel: classData.floorLevel,
           },
@@ -329,7 +329,7 @@ export class AssistantService {
         output: routeResult,
       });
 
-      if (routeResult.success) {
+      if (routeResult.success && routeResult.from && routeResult.eta_sec !== undefined && routeResult.distance_m !== undefined) {
         const mins = Math.ceil(routeResult.eta_sec / 60);
         reply = `${target.name} is ${routeResult.distance_m} meters away in ${target.building}, taking about ${mins} minute${mins > 1 ? 's' : ''} to walk. Follow the turn-by-turn guidance on your screen.`;
         action = {
@@ -337,7 +337,7 @@ export class AssistantService {
           destination: {
             id: target.id,
             name: target.name,
-            code: target.code,
+            code: target.code || undefined,
             building: target.building,
             floorLevel: target.floor,
             lat: target.lat,
@@ -347,7 +347,7 @@ export class AssistantService {
           route: {
             distance_m: routeResult.distance_m,
             eta_sec: routeResult.eta_sec,
-            stepsCount: routeResult.stepsCount,
+            stepsCount: routeResult.stepsCount || 0,
             firstStep: routeResult.firstStep,
           },
         };
@@ -358,7 +358,7 @@ export class AssistantService {
           destination: {
             id: target.id,
             name: target.name,
-            code: target.code,
+            code: target.code || undefined,
             building: target.building,
             floorLevel: target.floor,
             lat: target.lat,

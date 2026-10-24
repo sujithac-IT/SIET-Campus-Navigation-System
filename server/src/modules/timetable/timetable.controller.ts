@@ -42,7 +42,7 @@ export class TimetableController {
     }
   }
 
-  public async getChanges(req: Request, res: Response, next: NextFunction): Promise<void> {
+  public async getChanges(_req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const changes = await timetableRepository.getActiveChanges();
       res.status(200).json({

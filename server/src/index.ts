@@ -5,7 +5,7 @@ import { logger } from './core/logger.js';
 import { initSocketIO } from './modules/realtime/socket.js';
 
 const server = http.createServer(app);
-const io = initSocketIO(server);
+initSocketIO(server);
 
 const serverInstance = server.listen(config.PORT, () => {
   logger.info(`🚀 SIET Navigate Server running in ${config.NODE_ENV} mode on port ${config.PORT}`);

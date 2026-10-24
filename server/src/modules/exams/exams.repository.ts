@@ -226,7 +226,7 @@ export class ExamsRepository {
     };
     this.inMemoryChanges.unshift(memRecord);
 
-    const hall = FALLBACK_EXAM_HALLS.find((h) => h.id === data.examHallId) || FALLBACK_EXAM_HALLS[0];
+    const hall = FALLBACK_EXAM_HALLS.find((h) => h.id === data.examHallId) || FALLBACK_EXAM_HALLS[0]!;
 
     return {
       id: memRecord.id,
