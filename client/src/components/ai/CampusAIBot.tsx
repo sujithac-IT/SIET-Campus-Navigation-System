@@ -252,49 +252,109 @@ export const CampusAIBot: React.FC = () => {
   // Local fallback generator if backend is temporarily unreachable
   const generateLocalFallback = (query: string): any => {
     const q = query.toLowerCase();
-    if (q.includes('canteen') || q.includes('food')) {
+    if (q.includes('tech') || q.includes('tech park') || q.includes('lab') || q.includes('library') || q.includes('computing')) {
       return {
-        reply: 'The Student Canteen is 85 meters away past the central flagpole. Walking time is about 1 minute.',
+        reply: 'Starting real satellite navigation to Tech Park (New Innovation & Computing Block). Head west along the central avenue past the amphitheatre.',
         action: {
           type: 'start_navigation',
-          destination: { id: 'CANTEEN-01', name: 'Student Canteen', building: 'Campus Grounds', floorLevel: 0 },
-          route: { distance_m: 85, eta_sec: 75, stepsCount: 2, firstStep: 'Walk straight towards Canteen Promenade' },
+          destination: { id: 'b-techpark', code: 'techpark', name: 'Tech Park (New Innovation & Computing Block)', building: 'Tech Park', floorLevel: 0, lat: 11.040680, lng: 77.074800 },
+          route: { distance_m: 125, eta_sec: 95, stepsCount: 3, firstStep: 'Proceed west on tree-lined central avenue' },
         },
       };
     }
-    if (q.includes('library') || q.includes('book')) {
+    if (q.includes('main') || q.includes('main block') || q.includes('courtyard')) {
       return {
-        reply: 'The Central Library is 120 meters away on the ground floor next to the Admin Block. Follow the blue line.',
+        reply: 'Starting real satellite navigation to Main Block (5-Storey Academic Complex, LH 01 to 23). Follow the avenue towards the west courtyard.',
         action: {
           type: 'start_navigation',
-          destination: { id: 'LIB-STACK', name: 'Central Library', building: 'Library Block', floorLevel: 0 },
-          route: { distance_m: 120, eta_sec: 110, stepsCount: 3, firstStep: 'Head north towards Central Library foyer' },
+          destination: { id: 'b-main-block', code: 'mainblock', name: 'Main Block (5-Storey Complex)', building: 'Main Block', floorLevel: 0, lat: 11.040450, lng: 77.074250 },
+          route: { distance_m: 140, eta_sec: 105, stepsCount: 3, firstStep: 'Proceed west past the central roundabout' },
+        },
+      };
+    }
+    if (q.includes('academic') || q.includes('acad') || q.includes('coe') || q.includes('admin') || q.includes('principal')) {
+      return {
+        reply: 'Starting real satellite navigation to Academic Block (COE Wing & Principal Secretariat, LH 24 to 68). Follow the path southwest.',
+        action: {
+          type: 'start_navigation',
+          destination: { id: 'b-academic-block', code: 'academic', name: 'Academic Block (COE & Engineering Wing)', building: 'Academic Block', floorLevel: 0, lat: 11.040050, lng: 77.075050 },
+          route: { distance_m: 110, eta_sec: 85, stepsCount: 2, firstStep: 'Turn southwest towards Academic Block entrance' },
+        },
+      };
+    }
+    if (q.includes('amphi') || q.includes('amphitheatre') || q.includes('stage') || q.includes('theatre')) {
+      return {
+        reply: 'Starting real satellite navigation to the Open Air Amphitheatre situated between Main Block and Tech Park.',
+        action: {
+          type: 'start_navigation',
+          destination: { id: 'b-amphitheatre', code: 'amphi', name: 'Open Air Amphitheatre', building: 'Amphitheatre', floorLevel: 0, lat: 11.040320, lng: 77.074400 },
+          route: { distance_m: 95, eta_sec: 70, stepsCount: 2, firstStep: 'Walk towards the circular amphitheatre plaza' },
+        },
+      };
+    }
+    if (q.includes('canteen') || q.includes('food') || q.includes('cafe')) {
+      return {
+        reply: 'Starting real satellite navigation to the Student Food Court & Cafeteria. Proceed south past the parking area.',
+        action: {
+          type: 'start_navigation',
+          destination: { id: 'b-foodcourt', code: 'foodcourt', name: 'Campus Food Court & Cafeteria', building: 'Food Court', floorLevel: 0, lat: 11.039554, lng: 77.075400 },
+          route: { distance_m: 85, eta_sec: 65, stepsCount: 2, firstStep: 'Walk south along the Food Court Promenade' },
+        },
+      };
+    }
+    if (q.includes('girls') || q.includes('ghostel')) {
+      return {
+        reply: 'Starting real satellite navigation to the Girls Hostel Complex in the south residential sector.',
+        action: {
+          type: 'start_navigation',
+          destination: { id: 'b-girls-hostel', code: 'ghostel', name: 'Girls Hostel Complex', building: 'Girls Hostel', floorLevel: 0, lat: 11.038450, lng: 77.073900 },
+          route: { distance_m: 230, eta_sec: 180, stepsCount: 4, firstStep: 'Follow the south avenue towards the hostel zone' },
+        },
+      };
+    }
+    if (q.includes('boys') || q.includes('bhostel')) {
+      return {
+        reply: 'Starting real satellite navigation to the Boys Hostel Complex in the southwest sector.',
+        action: {
+          type: 'start_navigation',
+          destination: { id: 'b-boys-hostel', code: 'bhostel', name: 'Boys Hostel Complex', building: 'Boys Hostel', floorLevel: 0, lat: 11.038200, lng: 77.073200 },
+          route: { distance_m: 260, eta_sec: 210, stepsCount: 4, firstStep: 'Proceed past sports ground to boys hostel avenue' },
+        },
+      };
+    }
+    if (q.includes('gate') || q.includes('entrance') || q.includes('highway') || q.includes('nh 544')) {
+      return {
+        reply: 'Starting real satellite navigation to Main Campus Entrance Gateway on NH 544.',
+        action: {
+          type: 'start_navigation',
+          destination: { id: 'b-gate', code: 'gate', name: 'Main Campus Entrance Gateway (NH 544)', building: 'Entrance Arch', floorLevel: 0, lat: 11.040913, lng: 77.077493 },
+          route: { distance_m: 138, eta_sec: 110, stepsCount: 2, firstStep: 'Follow main boulevard east to entrance gate' },
         },
       };
     }
     if (q.includes('class') || q.includes('timetable')) {
       return {
-        reply: 'Your next class is Compiler Design in Room 302, CSE Block Floor 2 at 9:00 AM. Route is ready.',
+        reply: 'Your next class is in Tech Park Room 302 at 9:00 AM. Opening satellite navigation route.',
         action: {
           type: 'start_navigation',
-          destination: { id: 'LH-05', name: 'Lecture Hall 05 (Room 302)', building: 'Academic Block', floorLevel: 2 },
+          destination: { id: 'TECH-201', code: 'techpark', name: 'Tech Park Room 302', building: 'Tech Park', floorLevel: 2, lat: 11.040680, lng: 77.074800 },
         },
       };
     }
     if (q.includes('exam') || q.includes('seat')) {
       return {
-        reply: 'Your exam is in Tech Park Hall 101, Floor 1 at seat TP-A24. Starting navigation to the exam hall.',
+        reply: 'Your exam is in Main Block Hall LH 05. Opening satellite navigation route.',
         action: {
           type: 'start_navigation',
-          destination: { id: 'TECH-201', name: 'Tech Park Hall 101', building: 'Tech Park', floorLevel: 1 },
+          destination: { id: 'LH-05', code: 'mainblock', name: 'Main Block Exam Hall LH 05', building: 'Main Block', floorLevel: 1, lat: 11.040450, lng: 77.074250 },
         },
       };
     }
     return {
-      reply: `I searched campus records for "${query}". You can follow the navigation guide on your screen.`,
+      reply: `I found the campus location for "${query}". Opening live satellite navigation on the campus map.`,
       action: {
         type: 'start_navigation',
-        destination: { id: 'CANTEEN-01', name: 'Destination Landmark', building: 'Academic Block', floorLevel: 0 },
+        destination: { id: 'b-techpark', code: 'techpark', name: 'Tech Park (New Innovation Block)', building: 'Tech Park', floorLevel: 0, lat: 11.040680, lng: 77.074800 },
       },
     };
   };
@@ -308,8 +368,13 @@ export const CampusAIBot: React.FC = () => {
 
     setIsOpen(false);
     const dest = action.destination;
-    const destParam = encodeURIComponent(dest.code || dest.id || dest.name);
-    router.push(`/navigate?to=${destParam}&name=${encodeURIComponent(dest.name)}`);
+    const destCode = encodeURIComponent(dest.code || dest.id || dest.name);
+    const destName = encodeURIComponent(dest.name);
+    const latParam = dest.lat ? `&lat=${dest.lat}` : '';
+    const lngParam = dest.lng ? `&lng=${dest.lng}` : '';
+    
+    // Always navigate directly to the real satellite map with live GPS and satellite tiles
+    router.push(`/map?navigate=${destCode}&name=${destName}${latParam}${lngParam}`);
   };
 
   const handleResetChat = () => {

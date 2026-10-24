@@ -572,8 +572,11 @@ export const GeospatialCampusMap: React.FC<GeospatialCampusMapProps> = ({
     });
   }, [store.activeRoute, mapLoaded]);
 
-  // Start Navigation to Specific Campus Hub (Tech Park, Main Block, etc.)
-  const handleStartNavigationTo = (targetType: 'techpark' | 'mainblock' | 'academic' | 'amphi' | 'foodcourt' | 'gate') => {
+  // Start Navigation to Specific Campus Hub or Room on Satellite Map
+  const handleStartNavigationTo = (
+    targetType: string,
+    customDest?: { lat: number; lng: number; name: string }
+  ) => {
     let startLat = 11.040913;
     let startLng = 77.077493;
 
@@ -584,32 +587,70 @@ export const GeospatialCampusMap: React.FC<GeospatialCampusMapProps> = ({
 
     let destLat = 11.040680;
     let destLng = 77.074800;
-    let destName = 'Tech Park';
+    let destName = 'Tech Park (New Innovation Block)';
 
-    if (targetType === 'techpark') {
-      destLat = 11.040680;
-      destLng = 77.074800;
-      destName = 'Tech Park (New Innovation Block)';
-    } else if (targetType === 'mainblock') {
-      destLat = 11.040450;
-      destLng = 77.074250;
-      destName = 'Main Block (5-Storey Complex)';
-    } else if (targetType === 'academic') {
-      destLat = 11.040050;
-      destLng = 77.075050;
-      destName = 'Academic Block (COE Wing)';
-    } else if (targetType === 'amphi') {
-      destLat = 11.040320;
-      destLng = 77.074400;
-      destName = 'Open Air Amphitheatre';
-    } else if (targetType === 'foodcourt') {
-      destLat = 11.039554;
-      destLng = 77.075400;
-      destName = 'Student Food Court & Canteen';
-    } else if (targetType === 'gate') {
-      destLat = 11.040913;
-      destLng = 77.077493;
-      destName = 'Main Campus Entrance Gate (NH 544)';
+    if (customDest && customDest.lat && customDest.lng) {
+      destLat = customDest.lat;
+      destLng = customDest.lng;
+      destName = customDest.name || 'Selected Campus Destination';
+    } else {
+      const t = targetType.toLowerCase();
+
+      if (t.includes('tech') || t.includes('library') || t.includes('lib') || t.includes('1a') || t.includes('2a') || t === 'b-techpark') {
+        destLat = 11.040680;
+        destLng = 77.074800;
+        destName = 'Tech Park (New Innovation & Computing Block)';
+      } else if (t.includes('main') || t.includes('courtyard') || t === 'b-main-block' || t === 'b-main' || t.includes('lh 0') || t.includes('lh 1') || t.includes('lh 2') || t.includes('lh-0') || t.includes('lh-1') || t.includes('lh-2')) {
+        destLat = 11.040450;
+        destLng = 77.074250;
+        destName = 'Main Block (5-Storey Complex)';
+      } else if (t.includes('acad') || t.includes('admin') || t.includes('coe') || t.includes('principal') || t === 'b-academic-block' || t === 'b-acad' || t.includes('lh 2') || t.includes('lh 3') || t.includes('lh 4') || t.includes('lh 5') || t.includes('lh 6')) {
+        destLat = 11.040050;
+        destLng = 77.075050;
+        destName = 'Academic Block (COE & Engineering Wing)';
+      } else if (t.includes('amphi') || t.includes('theatre') || t.includes('stage') || t === 'b-amphitheatre') {
+        destLat = 11.040320;
+        destLng = 77.074400;
+        destName = 'Open Air Amphitheatre';
+      } else if (t.includes('food') || t.includes('canteen') || t.includes('cafe') || t === 'b-foodcourt' || t === 'b-canteen') {
+        destLat = 11.039554;
+        destLng = 77.075400;
+        destName = 'Campus Food Court & Cafeteria';
+      } else if (t.includes('ghostel') || t.includes('girls') || t === 'b-girls-hostel') {
+        destLat = 11.038450;
+        destLng = 77.073900;
+        destName = 'Girls Hostel Complex';
+      } else if (t.includes('bhostel') || t.includes('boys') || t === 'b-boys-hostel') {
+        destLat = 11.038200;
+        destLng = 77.073200;
+        destName = 'Boys Hostel Complex';
+      } else if (t.includes('sport') || t.includes('ground') || t.includes('court') || t === 'b-sports-arena' || t === 'b-sports') {
+        destLat = 11.039600;
+        destLng = 77.073800;
+        destName = 'SIET Sports Arena & Outdoor Courts';
+      } else if (t.includes('gate') || t.includes('entrance') || t === 'b-gate') {
+        destLat = 11.040913;
+        destLng = 77.077493;
+        destName = 'Main Campus Entrance Gateway (NH 544)';
+      } else if (t.includes('mech') || t.includes('workshop') || t === 'b-mech-workshops') {
+        destLat = 11.040920;
+        destLng = 77.073650;
+        destName = 'Mechanical & Heavy Engineering Workshops';
+      } else if (t.includes('park') || t === 'b-parking') {
+        destLat = 11.041210;
+        destLng = 77.076217;
+        destName = 'Surface Parking Grounds';
+      } else {
+        // Fallback: search buildings in geo data
+        const matchBld = SIET_GEO_BUILDINGS.find(
+          (b) => b.id.toLowerCase() === t || b.name.toLowerCase().includes(t) || b.code.toLowerCase() === t
+        );
+        if (matchBld && matchBld.lat && matchBld.lng) {
+          destLat = matchBld.lat;
+          destLng = matchBld.lng;
+          destName = matchBld.name;
+        }
+      }
     }
 
     const route = findRoute(
@@ -620,12 +661,46 @@ export const GeospatialCampusMap: React.FC<GeospatialCampusMapProps> = ({
       { isAccessibleOnly: store.isAccessibilityMode }
     );
 
+    // Make sure satellite layer is active for live satellite navigation
+    setActiveLayer('satellite');
+
     store.activeRoute = route;
     store.destination = { x: 50, y: 50, lat: destLat, lng: destLng, name: destName };
     setSelectedBuilding(null);
     setShowGateCard(false);
     setIsTourActive(false);
   };
+
+  // Automatic URL Search Param Listener for Direct Navigation (?navigate=... or ?to=...)
+  useEffect(() => {
+    if (!mapLoaded || typeof window === 'undefined') return;
+
+    const parseAndTriggerNavigation = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const navTarget = urlParams.get('navigate') || urlParams.get('to');
+      const navName = urlParams.get('name');
+      const latParam = urlParams.get('lat');
+      const lngParam = urlParams.get('lng');
+
+      if (navTarget) {
+        let customDest: { lat: number; lng: number; name: string } | undefined;
+        if (latParam && lngParam) {
+          const lat = parseFloat(latParam);
+          const lng = parseFloat(lngParam);
+          if (!isNaN(lat) && !isNaN(lng)) {
+            customDest = { lat, lng, name: navName || decodeURIComponent(navTarget) };
+          }
+        }
+        handleStartNavigationTo(navTarget, customDest);
+      }
+    };
+
+    parseAndTriggerNavigation();
+
+    // Also listen to popstate or window search changes
+    window.addEventListener('popstate', parseAndTriggerNavigation);
+    return () => window.removeEventListener('popstate', parseAndTriggerNavigation);
+  }, [mapLoaded]);
 
   // Real-time GPS Position Tracking during Active Navigation
   useEffect(() => {

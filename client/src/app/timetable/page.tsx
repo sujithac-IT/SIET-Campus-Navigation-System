@@ -127,7 +127,7 @@ export default function TimetablePage() {
 
   const handleNavigate = (roomCode: string) => {
     store.startNavigationToRoom(roomCode);
-    router.push(`/navigate?to=${encodeURIComponent(roomCode)}`);
+    router.push(`/map?navigate=${encodeURIComponent(roomCode)}`);
   };
 
   const getBuildingName = (buildingId: string) => {

@@ -21,7 +21,7 @@ export const NotificationToast: React.FC = () => {
     const targetRoom = roomCode || toast.actionRoomCode || toast.impactAnalysis?.newRoomCode || 'LH-28';
     store.startNavigationToRoom(targetRoom);
     store.clearPushToast();
-    router.push(`/navigate?to=${encodeURIComponent(targetRoom)}`);
+    router.push(`/map?navigate=${encodeURIComponent(targetRoom)}`);
   };
 
   const handleViewDetails = () => {

@@ -75,7 +75,7 @@ export const NotificationPanel: React.FC = () => {
                     <span className="text-[9px] text-slate-500">{notif.timestamp}</span>
                     {(notif.actionRoomCode || notif.link) && (
                       <a
-                        href={notif.link || `/navigate?to=${encodeURIComponent(notif.actionRoomCode || '')}`}
+                        href={notif.link || `/map?navigate=${encodeURIComponent(notif.actionRoomCode || '')}`}
                         onClick={(e) => e.stopPropagation()}
                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 hover:bg-cyan-500 hover:text-slate-950 text-[10px] font-bold transition shadow-sm"
                       >

@@ -34,7 +34,7 @@ export const Navbar: React.FC = () => {
     return [
       { href: '/', label: 'Home', icon: Home },
       { href: '/map', label: 'Map', icon: Map },
-      { href: '/navigate', label: 'Navigation HUD', icon: Compass },
+      { href: '/map?mode=navigation', label: 'Navigation HUD', icon: Compass },
       { href: '/timetable', label: 'Timetable', icon: Calendar },
       { href: '/exams', label: 'Exams', icon: GraduationCap },
       { href: '/announcements', label: 'Announcements', icon: Radio },

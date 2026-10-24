@@ -69,7 +69,7 @@ export default function MapPage() {
 
         <div className="flex items-center gap-2.5 sm:gap-3">
           <Link
-            href="/navigate"
+            href="/map?navigate=techpark&name=Tech+Park"
             className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 hover:bg-cyan-500 hover:text-slate-950 text-xs font-bold transition shadow-sm"
           >
             <Navigation className="w-3.5 h-3.5" /> Start HUD

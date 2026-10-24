@@ -88,7 +88,7 @@ class CampusSocketService {
         message: `Exam Hall shifted from ${data.oldHall} to ${data.newHall} (Roll Numbers: ${data.rollFrom} to ${data.rollTo}). Reason: ${data.reason}`,
         type: 'exam_alert',
         priority: 'CRITICAL',
-        link: `/navigate?to=${encodeURIComponent(data.newHall)}`,
+        link: `/map?navigate=${encodeURIComponent(data.newHall)}`,
       });
 
       voiceGuidance.speak(
