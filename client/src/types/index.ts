@@ -129,16 +129,23 @@ export interface PathEdge {
   verificationStatus?: 'verified' | 'provisional';
 }
 
+export interface RouteInstruction {
+  step: number;
+  text: string;
+  distanceMeters: number;
+  maneuver?: 'straight' | 'left' | 'right' | 'slight_left' | 'slight_right' | 'sharp_left' | 'sharp_right' | 'u_turn' | 'arrive';
+  landmark?: string;
+  targetNodeName?: string;
+  lat?: number;
+  lng?: number;
+  floorTransition?: { fromFloor: number; toFloor: number; type: 'stairs' | 'elevator' };
+}
+
 export interface RouteResult {
   nodes: PathNode[];
   totalDistanceMeters: number;
   estimatedTimeMinutes: number;
-  instructions: {
-    step: number;
-    text: string;
-    distanceMeters: number;
-    floorTransition?: { fromFloor: number; toFloor: number; type: 'stairs' | 'elevator' };
-  }[];
+  instructions: RouteInstruction[];
 }
 
 export interface CampusEvent {

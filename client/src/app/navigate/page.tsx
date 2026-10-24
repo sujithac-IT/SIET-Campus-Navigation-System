@@ -85,8 +85,8 @@ function NavigateContent() {
           text: st.text,
           distanceMeters: st.dist,
           floorTransition: undefined,
-          landmark: st.landmark,
-          maneuver: st.maneuver,
+          landmark: st.landmark || undefined,
+          maneuver: (st.maneuver as any) || 'straight',
         }));
 
         const nodes: PathNode[] = serverResult.polyline.map((p, idx) => ({
@@ -475,7 +475,7 @@ function NavigateContent() {
               <CheckCircle2 className="w-9 h-9" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-white">You Have Arrived!</h2>
+              <h2 className="text-xl font-black text-white">Your Destination Has Arrived!</h2>
               <p className="text-xs text-emerald-400 font-semibold mt-1">
                 {destinationName}
               </p>

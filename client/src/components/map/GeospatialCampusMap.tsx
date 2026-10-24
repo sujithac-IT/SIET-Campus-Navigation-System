@@ -40,8 +40,16 @@ import {
   RotateCcw,
   Sparkles,
   Crosshair,
+  Volume2,
+  VolumeX,
+  CornerUpRight,
+  CornerUpLeft,
+  ArrowUp,
+  Flag,
   X
 } from 'lucide-react';
+import { voiceGuidance } from '@/lib/speech/voiceGuidance';
+import { findRoute } from '@/lib/navigation/router';
 
 interface GeospatialCampusMapProps {
   onSelectBuilding?: (building: Building) => void;
@@ -188,6 +196,24 @@ export const GeospatialCampusMap: React.FC<GeospatialCampusMapProps> = ({
   const [isTourActive, setIsTourActive] = useState(false);
   const [currentWaypointIdx, setCurrentWaypointIdx] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
+
+  // Turn-by-Turn AI Voice Navigation State (Google Maps Style)
+  const [isNavActive, setIsNavActive] = useState(false);
+  const [navStepIndex, setNavStepIndex] = useState(0);
+  const [isVoiceMuted, setIsVoiceMuted] = useState(voiceGuidance.isMute());
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isSimulatingWalk, setIsSimulatingWalk] = useState(false);
+  const [destinationArrivedModal, setDestinationArrivedModal] = useState<string | null>(null);
+  const simulationTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const watchPositionIdRef = useRef<number | null>(null);
+
+  // Subscribe to voice guidance active speaking status
+  useEffect(() => {
+    const unsub = voiceGuidance.subscribe((speaking) => {
+      setIsSpeaking(speaking);
+    });
+    return () => unsub();
+  }, []);
 
   // Haversine helper
   const computeDistanceMeters = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -493,7 +519,7 @@ export const GeospatialCampusMap: React.FC<GeospatialCampusMapProps> = ({
     });
   }, [activeLayer, mapLoaded]);
 
-  // Handle Walking Route Display (Draws cyan glowing polyline)
+  // Handle Walking Route Display & Voice Guidance Start
   useEffect(() => {
     if (!mapInstanceRef.current || !mapLoaded) return;
 
@@ -505,7 +531,10 @@ export const GeospatialCampusMap: React.FC<GeospatialCampusMapProps> = ({
       }
 
       const activeRoute = store.activeRoute;
-      if (!activeRoute || activeRoute.nodes.length < 2) return;
+      if (!activeRoute || activeRoute.nodes.length < 2) {
+        setIsNavActive(false);
+        return;
+      }
 
       const latLngs: [number, number][] = activeRoute.nodes
         .map((node) => {
@@ -517,9 +546,9 @@ export const GeospatialCampusMap: React.FC<GeospatialCampusMapProps> = ({
 
       if (latLngs.length >= 2) {
         const polyline = L.polyline(latLngs, {
-          color: '#06b6d4',
-          weight: 6,
-          opacity: 0.9,
+          color: '#10b981', // Vibrant Google Maps navigation emerald
+          weight: 7,
+          opacity: 0.95,
           lineJoin: 'round',
           className: 'animate-route-flow'
         }).addTo(mapInstanceRef.current!);
@@ -527,10 +556,181 @@ export const GeospatialCampusMap: React.FC<GeospatialCampusMapProps> = ({
         routeLayerRef.current = polyline;
 
         // Auto zoom/pan to fit the active route
-        mapInstanceRef.current?.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+        mapInstanceRef.current?.fitBounds(polyline.getBounds(), { padding: [60, 60] });
+
+        setIsNavActive(true);
+        setNavStepIndex(0);
+        setDestinationArrivedModal(null);
+
+        // Voice announce route start
+        const destName = store.destination?.name || 'Destination';
+        if (activeRoute.instructions && activeRoute.instructions.length > 0) {
+          const firstStep = activeRoute.instructions[0];
+          voiceGuidance.announceRouteStart(destName, firstStep.text, firstStep.distanceMeters);
+        }
       }
     });
   }, [store.activeRoute, mapLoaded]);
+
+  // Start Navigation to Specific Campus Hub (Tech Park, Main Block, etc.)
+  const handleStartNavigationTo = (targetType: 'techpark' | 'mainblock' | 'academic' | 'amphi' | 'foodcourt' | 'gate') => {
+    let startLat = 11.040913;
+    let startLng = 77.077493;
+
+    if (userCampusStatus && userCampusStatus.lat && userCampusStatus.lng) {
+      startLat = userCampusStatus.lat;
+      startLng = userCampusStatus.lng;
+    }
+
+    let destLat = 11.040680;
+    let destLng = 77.074800;
+    let destName = 'Tech Park';
+
+    if (targetType === 'techpark') {
+      destLat = 11.040680;
+      destLng = 77.074800;
+      destName = 'Tech Park (New Innovation Block)';
+    } else if (targetType === 'mainblock') {
+      destLat = 11.040450;
+      destLng = 77.074250;
+      destName = 'Main Block (5-Storey Complex)';
+    } else if (targetType === 'academic') {
+      destLat = 11.040050;
+      destLng = 77.075050;
+      destName = 'Academic Block (COE Wing)';
+    } else if (targetType === 'amphi') {
+      destLat = 11.040320;
+      destLng = 77.074400;
+      destName = 'Open Air Amphitheatre';
+    } else if (targetType === 'foodcourt') {
+      destLat = 11.039554;
+      destLng = 77.075400;
+      destName = 'Student Food Court & Canteen';
+    } else if (targetType === 'gate') {
+      destLat = 11.040913;
+      destLng = 77.077493;
+      destName = 'Main Campus Entrance Gate (NH 544)';
+    }
+
+    const route = findRoute(
+      { lat: startLat, lng: startLng },
+      { lat: destLat, lng: destLng },
+      GEOSPATIAL_PATH_NODES,
+      GEOSPATIAL_PATH_EDGES,
+      { isAccessibleOnly: store.isAccessibilityMode }
+    );
+
+    store.activeRoute = route;
+    store.destination = { x: 50, y: 50, lat: destLat, lng: destLng, name: destName };
+    setSelectedBuilding(null);
+    setShowGateCard(false);
+    setIsTourActive(false);
+  };
+
+  // Real-time GPS Position Tracking during Active Navigation
+  useEffect(() => {
+    if (!isNavActive || !store.activeRoute || typeof window === 'undefined' || !navigator.geolocation) {
+      if (watchPositionIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchPositionIdRef.current);
+        watchPositionIdRef.current = null;
+      }
+      return;
+    }
+
+    watchPositionIdRef.current = navigator.geolocation.watchPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        if (userMarkerRef.current) {
+          userMarkerRef.current.setLatLng([latitude, longitude]);
+        }
+
+        const activeRoute = store.activeRoute;
+        if (!activeRoute) return;
+
+        const currentInstr = activeRoute.instructions[navStepIndex];
+        const nextNode = activeRoute.nodes[navStepIndex + 1];
+
+        if (nextNode && nextNode.lat && nextNode.lng) {
+          const dist = computeDistanceMeters(latitude, longitude, nextNode.lat, nextNode.lng);
+
+          if (dist <= 25 && dist > 8 && currentInstr) {
+            voiceGuidance.announceApproachingTurn(navStepIndex, currentInstr.text, dist);
+          } else if (dist <= 8 && currentInstr) {
+            if (currentInstr.maneuver === 'arrive' || navStepIndex >= activeRoute.instructions.length - 1) {
+              const destName = store.destination?.name || 'Destination';
+              voiceGuidance.announceArrival(destName);
+              setDestinationArrivedModal(destName);
+            } else {
+              voiceGuidance.announceTurnNow(navStepIndex, `${currentInstr.text.split(' and ')[0]} now`);
+              setNavStepIndex((prev) => Math.min(prev + 1, activeRoute.instructions.length - 1));
+            }
+          }
+        }
+      },
+      (err) => {
+        console.warn('GPS WatchPosition:', err.message);
+      },
+      { enableHighAccuracy: true, maximumAge: 1000, timeout: 5000 }
+    );
+
+    return () => {
+      if (watchPositionIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchPositionIdRef.current);
+        watchPositionIdRef.current = null;
+      }
+    };
+  }, [isNavActive, navStepIndex, store.activeRoute]);
+
+  // Simulated Walk Walker (Tests turn-by-turn guidance and arrival on any device)
+  const handleStartSimulatedWalk = () => {
+    if (!store.activeRoute || store.activeRoute.nodes.length === 0) return;
+    setIsSimulatingWalk(true);
+    let step = navStepIndex;
+
+    if (simulationTimerRef.current) clearInterval(simulationTimerRef.current);
+
+    // Speak initial step
+    const startInstr = store.activeRoute.instructions[step];
+    if (startInstr) {
+      voiceGuidance.speak(startInstr.text, true);
+    }
+
+    simulationTimerRef.current = setInterval(() => {
+      step++;
+      const totalSteps = store.activeRoute?.instructions.length || 0;
+      const nodes = store.activeRoute?.nodes || [];
+
+      if (step < totalSteps) {
+        setNavStepIndex(step);
+        const curInstr = store.activeRoute?.instructions[step];
+        const targetNode = nodes[step] || nodes[nodes.length - 1];
+
+        // Move user marker & pan camera along route
+        if (targetNode && targetNode.lat && targetNode.lng && userMarkerRef.current && mapInstanceRef.current) {
+          userMarkerRef.current.setLatLng([targetNode.lat, targetNode.lng]);
+          mapInstanceRef.current.panTo([targetNode.lat, targetNode.lng], { animate: true, duration: 1.2 });
+        }
+
+        if (curInstr) {
+          if (curInstr.maneuver === 'arrive' || step === totalSteps - 1) {
+            clearInterval(simulationTimerRef.current!);
+            setIsSimulatingWalk(false);
+            const destName = store.destination?.name || 'Destination';
+            voiceGuidance.announceArrival(destName);
+            setDestinationArrivedModal(destName);
+          } else {
+            voiceGuidance.speak(curInstr.text, true);
+          }
+        }
+      } else {
+        clearInterval(simulationTimerRef.current!);
+        setIsSimulatingWalk(false);
+        const destName = store.destination?.name || 'Destination';
+        voiceGuidance.announceArrival(destName);
+        setDestinationArrivedModal(destName);
+      }
+    }, 4000);
+  };
 
   // Locate User via GPS with automatic campus proximity detection
   const handleToggleGPS = (autoCenter = true) => {
@@ -628,13 +828,145 @@ export const GeospatialCampusMap: React.FC<GeospatialCampusMapProps> = ({
   };
 
   const currentWp = CAMPUS_WAYPOINTS[currentWaypointIdx] || CAMPUS_WAYPOINTS[0]!;
+  const currentInstruction = store.activeRoute?.instructions?.[navStepIndex];
+  const nextInstruction = store.activeRoute?.instructions?.[navStepIndex + 1];
 
   return (
     <div className={`relative w-full h-full rounded-2xl overflow-hidden ${className}`}>
       {/* Map Viewport Container */}
       <div ref={mapContainerRef} className="w-full h-full bg-slate-950 z-0" />
 
-      {/* Top Left Navigation Toolbar */}
+      {/* Google Maps Turn-by-Turn Navigation HUD Card */}
+      {isNavActive && store.activeRoute && currentInstruction && (
+        <div className="absolute top-4 left-4 right-4 sm:left-1/2 sm:-translate-x-1/2 sm:w-[640px] z-30 bg-slate-950/95 backdrop-blur-2xl border-2 border-emerald-500/80 rounded-2xl p-4 shadow-2xl animate-in slide-in-from-top-4 duration-300 text-slate-100 ring-4 ring-emerald-500/20">
+          <div className="flex items-start justify-between gap-3">
+            {/* Maneuver Icon */}
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-emerald-400 shadow-lg shadow-emerald-500/30 flex-shrink-0">
+                {currentInstruction.maneuver === 'right' || currentInstruction.maneuver === 'sharp_right' ? (
+                  <CornerUpRight className="w-7 h-7 text-emerald-400 animate-pulse" />
+                ) : currentInstruction.maneuver === 'left' || currentInstruction.maneuver === 'sharp_left' ? (
+                  <CornerUpLeft className="w-7 h-7 text-emerald-400 animate-pulse" />
+                ) : currentInstruction.maneuver === 'arrive' ? (
+                  <Flag className="w-7 h-7 text-emerald-400 animate-bounce" />
+                ) : (
+                  <ArrowUp className="w-7 h-7 text-emerald-400 animate-pulse" />
+                )}
+              </div>
+
+              {/* Turn Instruction Text & Next Step Preview */}
+              <div className="text-left">
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500 text-slate-950">
+                    {currentInstruction.maneuver === 'arrive'
+                      ? 'Destination'
+                      : `In ${currentInstruction.distanceMeters || 0} m`}
+                  </span>
+                  <span className="text-[11px] text-slate-400 font-semibold">
+                    Step {navStepIndex + 1} of {store.activeRoute.instructions.length}
+                  </span>
+                  {isSpeaking && (
+                    <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 animate-pulse">
+                      <Volume2 className="w-3 h-3" /> Speaking...
+                    </span>
+                  )}
+                </div>
+
+                <h3 className="text-sm sm:text-base font-extrabold text-white mt-1 leading-tight">
+                  {currentInstruction.text}
+                </h3>
+
+                {nextInstruction && (
+                  <p className="text-[11px] text-emerald-300/80 font-medium mt-0.5 flex items-center gap-1">
+                    <span className="font-bold text-slate-400">Then:</span> <span>{nextInstruction.text}</span>
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Control Buttons: Voice, Simulation, Exit */}
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              {/* Voice Toggle */}
+              <button
+                onClick={() => {
+                  const nextMute = voiceGuidance.toggleMute();
+                  setIsVoiceMuted(nextMute);
+                  if (!nextMute && currentInstruction) {
+                    voiceGuidance.speak(currentInstruction.text, true);
+                  }
+                }}
+                className={`p-2 rounded-xl border transition ${
+                  isVoiceMuted
+                    ? 'bg-slate-900 border-slate-700 text-slate-400 hover:text-white'
+                    : isSpeaking
+                    ? 'bg-emerald-500 text-slate-950 border-emerald-400 ring-2 ring-emerald-400/50 animate-pulse'
+                    : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
+                }`}
+                title={isVoiceMuted ? 'Unmute AI Voice Navigation' : 'Mute Voice Navigation'}
+              >
+                {isVoiceMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+              </button>
+
+              {/* Test Walk / Simulate */}
+              <button
+                onClick={() => {
+                  if (isSimulatingWalk) {
+                    if (simulationTimerRef.current) clearInterval(simulationTimerRef.current);
+                    setIsSimulatingWalk(false);
+                  } else {
+                    handleStartSimulatedWalk();
+                  }
+                }}
+                className={`px-2.5 py-1.5 rounded-xl border text-xs font-black transition flex items-center gap-1 ${
+                  isSimulatingWalk
+                    ? 'bg-amber-500 text-slate-950 border-amber-400 animate-pulse'
+                    : 'bg-slate-900 border-slate-700 text-slate-300 hover:text-white'
+                }`}
+                title="Simulate walking step-by-step with voice turn prompts"
+              >
+                {isSimulatingWalk ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                <span className="hidden sm:inline">{isSimulatingWalk ? 'Pause Walk' : 'Simulate Walk'}</span>
+              </button>
+
+              {/* Exit Nav */}
+              <button
+                onClick={() => {
+                  if (simulationTimerRef.current) clearInterval(simulationTimerRef.current);
+                  setIsSimulatingWalk(false);
+                  setIsNavActive(false);
+                  store.clearActiveRoute();
+                  voiceGuidance.stop();
+                }}
+                className="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-400 hover:text-white transition"
+                title="Exit Navigation"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Trip Progress Bar & Bottom Stats */}
+          <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-3">
+              <span className="font-extrabold text-emerald-400 text-sm">
+                {Math.max(0, store.activeRoute.totalDistanceMeters - (navStepIndex * 30))} m remaining
+              </span>
+              <span className="text-slate-400 font-medium">
+                ~{Math.max(1, Math.ceil((store.activeRoute.totalDistanceMeters - (navStepIndex * 30)) / 75))} min walk
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-slate-300 truncate max-w-[200px] font-bold">
+                🎯 {store.destination?.name || 'Destination'}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Top Left Navigation Toolbar (Shown when not navigating) */}
+      {!isNavActive && (
       <div className="absolute top-4 left-4 z-30 flex flex-wrap items-center gap-2">
         {/* Layer Switcher */}
         <div className="flex items-center gap-1 bg-slate-950/90 backdrop-blur-xl border border-slate-700/80 rounded-xl p-1 shadow-2xl">
@@ -723,6 +1055,7 @@ export const GeospatialCampusMap: React.FC<GeospatialCampusMapProps> = ({
           {showPaths ? '✓ Walkways On' : 'Walkways Off'}
         </button>
       </div>
+      )}
 
       {/* Top Right Map Control Icons */}
       <div className="absolute top-4 right-4 z-30 flex flex-col gap-2">
@@ -1158,6 +1491,100 @@ export const GeospatialCampusMap: React.FC<GeospatialCampusMapProps> = ({
       >
         <Crosshair className={`w-5 h-5 ${isLocating ? 'animate-spin' : ''}`} />
       </button>
+      {/* Floating Quick Campus Navigation Hub Bar (Shown when not in active navigation) */}
+      {!isNavActive && (
+        <div className="absolute bottom-6 left-4 right-16 sm:left-1/2 sm:-translate-x-1/2 sm:w-auto sm:right-auto z-20 flex flex-wrap items-center justify-center gap-1.5 p-2 bg-slate-950/95 backdrop-blur-2xl border border-slate-700/80 rounded-2xl shadow-2xl">
+          <span className="text-[10px] font-extrabold text-cyan-400 px-2 flex items-center gap-1 uppercase tracking-wider">
+            <Navigation className="w-3.5 h-3.5" /> Navigate:
+          </span>
+          <button
+            onClick={() => handleStartNavigationTo('techpark')}
+            className="px-2.5 py-1.5 rounded-xl bg-cyan-600/30 hover:bg-cyan-600/50 border border-cyan-500/50 text-cyan-200 text-xs font-black transition flex items-center gap-1 shadow-sm active:scale-95"
+            title="Navigate from your location to Tech Park"
+          >
+            🏢 Tech Park
+          </button>
+          <button
+            onClick={() => handleStartNavigationTo('mainblock')}
+            className="px-2.5 py-1.5 rounded-xl bg-sky-600/30 hover:bg-sky-600/50 border border-sky-500/50 text-sky-200 text-xs font-black transition flex items-center gap-1 shadow-sm active:scale-95"
+            title="Navigate from your location to Main Block"
+          >
+            🏛️ Main Block
+          </button>
+          <button
+            onClick={() => handleStartNavigationTo('academic')}
+            className="px-2.5 py-1.5 rounded-xl bg-blue-600/30 hover:bg-blue-600/50 border border-blue-500/50 text-blue-200 text-xs font-black transition flex items-center gap-1 shadow-sm active:scale-95"
+            title="Navigate to Academic Block (COE Wing)"
+          >
+            🎓 Academic Block
+          </button>
+          <button
+            onClick={() => handleStartNavigationTo('amphi')}
+            className="px-2.5 py-1.5 rounded-xl bg-amber-600/30 hover:bg-amber-600/50 border border-amber-500/50 text-amber-200 text-xs font-black transition flex items-center gap-1 shadow-sm active:scale-95"
+            title="Navigate to Open Air Amphitheatre"
+          >
+            🎭 Amphitheatre
+          </button>
+          <button
+            onClick={() => handleStartNavigationTo('foodcourt')}
+            className="px-2.5 py-1.5 rounded-xl bg-rose-600/30 hover:bg-rose-600/50 border border-rose-500/50 text-rose-200 text-xs font-black transition flex items-center gap-1 shadow-sm active:scale-95"
+            title="Navigate to Food Court & Canteen"
+          >
+            🍽️ Canteen
+          </button>
+          <button
+            onClick={() => handleStartNavigationTo('gate')}
+            className="px-2.5 py-1.5 rounded-xl bg-emerald-600/30 hover:bg-emerald-600/50 border border-emerald-500/50 text-emerald-200 text-xs font-black transition flex items-center gap-1 shadow-sm active:scale-95"
+            title="Navigate to Campus Entrance Gate"
+          >
+            🚪 Gate
+          </button>
+        </div>
+      )}
+
+      {/* Google Maps Style Destination Arrival Celebration Modal */}
+      {destinationArrivedModal && (
+        <div className="absolute inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-slate-900 border-2 border-emerald-500 rounded-3xl w-full max-w-md p-6 shadow-2xl flex flex-col items-center text-center relative overflow-hidden">
+            <div className="absolute -top-12 -right-12 w-40 h-40 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-3xl mb-4 shadow-lg shadow-emerald-500/30 animate-bounce">
+              🏁
+            </div>
+
+            <span className="px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 mb-2">
+              Destination Arrived
+            </span>
+
+            <h2 className="text-xl sm:text-2xl font-black text-white mb-2 leading-tight">
+              Your Destination Has Arrived!
+            </h2>
+
+            <p className="text-sm text-cyan-300 font-extrabold mb-3">
+              {destinationArrivedModal}
+            </p>
+
+            <p className="text-xs text-slate-300 leading-relaxed mb-6">
+              You have successfully arrived at your campus location. The verified entrance and doorways are directly in front of you. Follow on-site signage for interior classrooms or laboratories.
+            </p>
+
+            <div className="flex w-full gap-2.5">
+              <button
+                onClick={() => {
+                  setDestinationArrivedModal(null);
+                  setIsNavActive(false);
+                  store.clearActiveRoute();
+                  voiceGuidance.stop();
+                }}
+                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-xs shadow-lg shadow-emerald-500/30 transition active:scale-98"
+              >
+                Done & Finish Navigation
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

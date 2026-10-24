@@ -705,11 +705,17 @@ export const GEOSPATIAL_PATH_EDGES: PathEdge[] = [
   { from: 'gn-hostel-junc', to: 'gn-bhostel-door', distanceMeters: 25, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Walk into Boys Hostel reception', verificationStatus: 'verified' },
   { from: 'gn-bhostel-door', to: 'gn-hostel-junc', distanceMeters: 25, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Exit Boys Hostel onto residential avenue', verificationStatus: 'verified' },
 
-  // Amphitheatre Connections (between Main Block and Tech Park)
-  { from: 'gn-acad-main-door', to: 'gn-amphi', distanceMeters: 30, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Step out of Main Block into Open Air Amphitheatre', verificationStatus: 'verified' },
-  { from: 'gn-amphi', to: 'gn-acad-main-door', distanceMeters: 30, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Walk from Amphitheatre into Main Block porch', verificationStatus: 'verified' },
-  { from: 'gn-amphi', to: 'gn-tech-porch', distanceMeters: 45, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Walk east from Amphitheatre to Tech Park entrance', verificationStatus: 'verified' },
-  { from: 'gn-tech-porch', to: 'gn-amphi', distanceMeters: 45, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Walk west from Tech Park to Open Air Amphitheatre', verificationStatus: 'verified' }
+  // Amphitheatre & Central Core Connections (between Main Block, Tech Park, Academic Block)
+  { from: 'gn-acad-main-door', to: 'gn-amphi', distanceMeters: 30, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Step out of Main Block toward Open Air Amphitheatre', verificationStatus: 'verified' },
+  { from: 'gn-amphi', to: 'gn-acad-main-door', distanceMeters: 30, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Walk into Main Block entrance porch', verificationStatus: 'verified' },
+  { from: 'gn-amphi', to: 'gn-tech-porch', distanceMeters: 45, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Walk east past the amphitheatre steps to Tech Park entrance', verificationStatus: 'verified' },
+  { from: 'gn-tech-porch', to: 'gn-amphi', distanceMeters: 45, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Walk west from Tech Park towards Open Air Amphitheatre', verificationStatus: 'verified' },
+  { from: 'gn-acad-main-door', to: 'gn-tech-porch', distanceMeters: 62, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Walk across the central plaza from Main Block to Tech Park', verificationStatus: 'verified' },
+  { from: 'gn-tech-porch', to: 'gn-acad-main-door', distanceMeters: 62, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Walk across the central plaza from Tech Park to Main Block', verificationStatus: 'verified' },
+  { from: 'gn-amphi', to: 'gn-roundabout', distanceMeters: 72, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Walk north along the walkway to central roundabout', verificationStatus: 'verified' },
+  { from: 'gn-roundabout', to: 'gn-amphi', distanceMeters: 72, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Walk south towards the Open Air Amphitheatre', verificationStatus: 'verified' },
+  { from: 'gn-amphi', to: 'gn-admin-porch', distanceMeters: 58, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Walk south-east towards Academic Block administrative porch', verificationStatus: 'verified' },
+  { from: 'gn-admin-porch', to: 'gn-amphi', distanceMeters: 58, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Walk north-west towards the Open Air Amphitheatre', verificationStatus: 'verified' }
 ];
 
 export const MAP_LAYERS = {

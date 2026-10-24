@@ -182,9 +182,44 @@ class VoiceGuidanceEngine {
     this.speak('Off route. Recalculating path to destination.', true);
   }
 
+  /**
+   * Synthesize Google Maps arrival celebration chime (C5 -> E5 -> G5)
+   */
+  public async playArrivalChime(): Promise<void> {
+    if (this.isMuted || typeof window === 'undefined') return;
+    try {
+      const AudioCtxClass =
+        window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (!AudioCtxClass) return;
+      if (!this.audioCtx) this.audioCtx = new AudioCtxClass();
+      if (this.audioCtx.state === 'suspended') await this.audioCtx.resume();
+
+      const now = this.audioCtx.currentTime;
+      const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+      notes.forEach((freq, idx) => {
+        const osc = this.audioCtx!.createOscillator();
+        const gain = this.audioCtx!.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+        gain.gain.setValueAtTime(0.001, now + idx * 0.12);
+        gain.gain.exponentialRampToValueAtTime(0.2, now + idx * 0.12 + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.35);
+        osc.connect(gain);
+        gain.connect(this.audioCtx!.destination);
+        osc.start(now + idx * 0.12);
+        osc.stop(now + idx * 0.12 + 0.35);
+      });
+    } catch {
+      // AudioContext unavailable
+    }
+  }
+
   public announceArrival(destName: string): void {
     this.resetAnnouncements();
-    this.speak(`You have arrived at ${destName}.`, true);
+    this.playArrivalChime();
+    setTimeout(() => {
+      this.speak(`Your destination has arrived. Welcome to ${destName}!`, true);
+    }, 450);
   }
 
   public stop(): void {

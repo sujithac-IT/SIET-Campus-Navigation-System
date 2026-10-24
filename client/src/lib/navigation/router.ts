@@ -34,6 +34,30 @@ export function calculateDistanceMeters(a: CoordinatePoint, b: CoordinatePoint):
 }
 
 /**
+ * Calculates compass bearing from point A to point B in degrees (0 - 360)
+ */
+export function calculateBearing(a: CoordinatePoint, b: CoordinatePoint): number {
+  if (a.lat !== undefined && a.lng !== undefined && b.lat !== undefined && b.lng !== undefined) {
+    const toRad = (deg: number) => (deg * Math.PI) / 180;
+    const toDeg = (rad: number) => (rad * 180) / Math.PI;
+
+    const phi1 = toRad(a.lat);
+    const phi2 = toRad(b.lat);
+    const deltaLambda = toRad(b.lng - a.lng);
+
+    const y = Math.sin(deltaLambda) * Math.cos(phi2);
+    const x = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(deltaLambda);
+
+    let bearing = toDeg(Math.atan2(y, x));
+    return (bearing + 360) % 360;
+  }
+  const dx = (b.x ?? 0) - (a.x ?? 0);
+  const dy = (b.y ?? 0) - (a.y ?? 0);
+  let angle = (Math.atan2(dx, -dy) * 180) / Math.PI;
+  return (angle + 360) % 360;
+}
+
+/**
  * Snaps any coordinate to the closest graph node
  */
 export function findNearestNode(
@@ -186,7 +210,7 @@ export function findRoute(
     };
   }
 
-  // Step-by-step turn guidance with distance and landmarks
+  // Step-by-step turn guidance with distance, maneuver, and destination arrival
   let totalDist = 0;
   const instructions: RouteResult['instructions'] = [];
 
@@ -206,11 +230,60 @@ export function findRoute(
     );
     totalDist += dist;
 
-    let text = edge?.landmarkText || `Proceed from ${fromNode.name} to ${toNode.name}`;
-    let floorTransition;
+    // Calculate dynamic turn maneuver
+    const bCurrent = calculateBearing(
+      { lat: fromNode.lat, lng: fromNode.lng, x: fromNode.coordinates?.x, y: fromNode.coordinates?.y },
+      { lat: toNode.lat, lng: toNode.lng, x: toNode.coordinates?.x, y: toNode.coordinates?.y }
+    );
 
+    let maneuver: RouteResult['instructions'][0]['maneuver'] = 'straight';
+    let turnAction = 'Continue straight';
+
+    if (i === 0) {
+      turnAction = 'Head straight';
+      maneuver = 'straight';
+    } else {
+      const prevNode = pathNodes[i - 1];
+      const bPrev = calculateBearing(
+        { lat: prevNode.lat, lng: prevNode.lng, x: prevNode.coordinates?.x, y: prevNode.coordinates?.y },
+        { lat: fromNode.lat, lng: fromNode.lng, x: fromNode.coordinates?.x, y: fromNode.coordinates?.y }
+      );
+      const turnAngle = (bCurrent - bPrev + 540) % 360 - 180;
+
+      if (turnAngle > 35 && turnAngle <= 65) {
+        maneuver = 'slight_right';
+        turnAction = 'Bear slightly right';
+      } else if (turnAngle > 65 && turnAngle <= 125) {
+        maneuver = 'right';
+        turnAction = 'Turn right';
+      } else if (turnAngle > 125) {
+        maneuver = 'sharp_right';
+        turnAction = 'Take sharp right';
+      } else if (turnAngle < -35 && turnAngle >= -65) {
+        maneuver = 'slight_left';
+        turnAction = 'Bear slightly left';
+      } else if (turnAngle < -65 && turnAngle >= -125) {
+        maneuver = 'left';
+        turnAction = 'Turn left';
+      } else if (turnAngle < -125) {
+        maneuver = 'sharp_left';
+        turnAction = 'Take sharp left';
+      } else {
+        maneuver = 'straight';
+        turnAction = 'Continue straight';
+      }
+    }
+
+    let text = edge?.landmarkText
+      ? (i > 0 && turnAction !== 'Continue straight'
+          ? `${turnAction} and ${edge.landmarkText.charAt(0).toLowerCase() + edge.landmarkText.slice(1)}`
+          : edge.landmarkText)
+      : `${turnAction} towards ${toNode.name}`;
+
+    let floorTransition;
     if (toNode.isStairsOrElevator && toNode.floor !== undefined) {
       const isElevator = edge?.type === 'elevator';
+      maneuver = 'straight';
       text = `Take ${isElevator ? 'elevator' : 'stairs'} to Floor ${toNode.floor} in ${toNode.buildingId || 'Block'}`;
       floorTransition = {
         fromFloor: fromNode.floor || 0,
@@ -223,9 +296,26 @@ export function findRoute(
       step: i + 1,
       text,
       distanceMeters: dist,
+      maneuver,
+      landmark: edge?.landmarkText || undefined,
+      targetNodeName: toNode.name,
+      lat: toNode.lat,
+      lng: toNode.lng,
       floorTransition
     });
   }
+
+  // Final destination arrival step (Google Maps style)
+  instructions.push({
+    step: pathNodes.length,
+    text: `Your destination has arrived: ${targetNode.name}`,
+    distanceMeters: 0,
+    maneuver: 'arrive',
+    landmark: `Arrived at ${targetNode.name}`,
+    targetNodeName: targetNode.name,
+    lat: targetNode.lat,
+    lng: targetNode.lng
+  });
 
   const estimatedTimeMinutes = Math.max(1, Math.ceil(totalDist / speed));
 
