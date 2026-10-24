@@ -495,7 +495,7 @@ export const INITIAL_BUILDINGS: Building[] = [
   {
     id: 'b-girls-hostel',
     name: 'Girls Hostel Complex',
-    code: 'GHOST',
+    code: 'G-HOSTEL',
     category: 'hostel',
     description: 'Secure residential quarters for female students with dining hall, RO water, and restrooms.',
     coordinates: { x: 85, y: 75 },

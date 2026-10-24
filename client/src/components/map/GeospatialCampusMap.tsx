@@ -39,6 +39,7 @@ import {
   Pause,
   RotateCcw,
   Sparkles,
+  Crosshair,
   X
 } from 'lucide-react';
 
@@ -74,40 +75,62 @@ export const CAMPUS_WAYPOINTS = [
   },
   {
     id: 'wp-main',
-    name: '3. Main Administrative Block',
-    lat: 11.039940,
-    lng: 77.074923,
-    zoom: 18.5,
-    photo: '/references/siet_main_block_glass.jpg',
-    googleMapsUrl: 'https://maps.app.goo.gl/ee39AaW9UTeK58R68',
-    description: 'Signature glass-fronted administrative center. Houses Principal, COE Office, and Exam Halls LH 24 to LH 68.',
-    badge: 'Admin & Exam Halls LH 24-68'
-  },
-  {
-    id: 'wp-acad',
-    name: '4. Multi-Storey Academic Block',
+    name: '3. Main Block (Multi-Storey Complex)',
     lat: 11.040404,
     lng: 77.074018,
     zoom: 18.5,
     photo: '/references/siet_academic_building.jpg',
     googleMapsUrl: 'https://maps.app.goo.gl/iXihKqeHzW7J3VK38',
-    description: 'Premier 5-level Academic Block (18m height) housing Exam Halls LH 01 to LH 23, AI Research Center, and computing labs.',
-    badge: 'Academic Halls LH 01-23'
+    description: 'Premier 5-level Main Block on the west lawn housing Exam Halls LH 01 to LH 23, AI Research Center, computing laboratories, and departmental faculty chambers.',
+    badge: 'Main Block · LH 01-23'
+  },
+  {
+    id: 'wp-amphi',
+    name: '4. Open Air Amphitheatre',
+    lat: 11.040320,
+    lng: 77.074400,
+    zoom: 19,
+    photo: '/references/siet_campus_satellite_internal_road.jpg',
+    googleMapsUrl: 'https://maps.app.goo.gl/ee39AaW9UTeK58R68',
+    description: 'Central circular tiered open-air amphitheatre situated between Main Block and Tech Park for cultural events, hackathons, and student assemblies.',
+    badge: 'Amphitheatre & Cultural Stage'
   },
   {
     id: 'wp-tech',
-    name: '5. New Block (Tech Park)',
-    lat: 11.040150,
-    lng: 77.075400,
+    name: '5. Tech Park (New Block)',
+    lat: 11.040734,
+    lng: 77.074880,
     zoom: 18.5,
     photo: '/references/siet_campus_satellite_internal_road.jpg',
     googleMapsUrl: 'https://maps.app.goo.gl/ee39AaW9UTeK58R68',
-    description: 'Modern New Block housing Smart Lecture Halls 1A, 1B, 1C, 1D, 2A, 2B, 2C, 2D and student startup incubators.',
-    badge: 'Tech Park Halls 1A-2D'
+    description: 'Modern Tech Park housing Exam Halls 1A to 2D, Incubation Center, AI/Robotics & Cloud Labs, and Central Digital Library.',
+    badge: 'Tech Park · Halls 1A-2D'
+  },
+  {
+    id: 'wp-acad',
+    name: '6. Academic Block (Administrative & COE Wing)',
+    lat: 11.039940,
+    lng: 77.074923,
+    zoom: 18.5,
+    photo: '/references/siet_main_block_glass.jpg',
+    googleMapsUrl: 'https://maps.app.goo.gl/ee39AaW9UTeK58R68',
+    description: 'Signature glass-fronted administrative center. Houses Controller of Examinations (COE), Principal Secretariat, and Exam Halls LH 24 to LH 68.',
+    badge: 'Academic Block · LH 24-68'
+  },
+  {
+    id: 'wp-ghostel',
+    name: '7. Girls Hostel Complex',
+    lat: 11.038450,
+    lng: 77.073900,
+    zoom: 18.5,
+    photo: '/references/siet_campus_satellite_internal_road.jpg',
+    googleMapsUrl: 'https://maps.app.goo.gl/ee39AaW9UTeK58R68',
+    description: 'Secure residential quarters for female students featuring furnished rooms, dining hall, study lounge, and 24/7 security warden.',
+    badge: 'Girls Hostel · 24/7 Security'
   },
   {
     id: 'wp-sports',
-    name: '6. Sports Arena & Synthetic Courts',
+    name: '8. Sports Arena & Synthetic Courts',
     lat: 11.039450,
     lng: 77.073400,
     zoom: 18.5,
@@ -145,6 +168,17 @@ export const GeospatialCampusMap: React.FC<GeospatialCampusMapProps> = ({
   const [gpsError, setGpsError] = useState<string | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [currentZoom, setCurrentZoom] = useState(17);
+
+  // Mobile / First-Time Location Prompt State
+  const [showLocationPrompt, setShowLocationPrompt] = useState(true);
+  const [isLocating, setIsLocating] = useState(false);
+  const [userCampusStatus, setUserCampusStatus] = useState<{
+    lat: number;
+    lng: number;
+    accuracy: number;
+    distanceMeters: number;
+    isOnCampus: boolean;
+  } | null>(null);
 
   // College Gate Zoom-in Feature State
   const [showGateCard, setShowGateCard] = useState(false);
@@ -498,14 +532,15 @@ export const GeospatialCampusMap: React.FC<GeospatialCampusMapProps> = ({
     });
   }, [store.activeRoute, mapLoaded]);
 
-  // Toggle Geolocation
-  const handleToggleGPS = () => {
-    if (!navigator.geolocation) {
-      setGpsError('Geolocation is not supported by your browser.');
+  // Locate User via GPS with automatic campus proximity detection
+  const handleToggleGPS = (autoCenter = true) => {
+    if (typeof window === 'undefined' || !navigator.geolocation) {
+      setGpsError('Geolocation is not supported by your browser/device.');
+      setShowLocationPrompt(false);
       return;
     }
 
-    if (gpsActive) {
+    if (gpsActive && autoCenter !== true) {
       setGpsActive(false);
       if (userMarkerRef.current && mapInstanceRef.current) {
         mapInstanceRef.current.removeLayer(userMarkerRef.current);
@@ -514,11 +549,27 @@ export const GeospatialCampusMap: React.FC<GeospatialCampusMapProps> = ({
       return;
     }
 
+    setIsLocating(true);
     setGpsError(null);
+
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude, accuracy } = pos.coords;
         setGpsActive(true);
+        setIsLocating(false);
+        setShowLocationPrompt(false);
+
+        // Distance from SIET Campus Center (11.04035, 77.07485)
+        const d = computeDistanceMeters(latitude, longitude, 11.04035, 77.07485);
+        const isOnCampus = d <= 1200; // Within 1.2km of campus perimeter
+
+        setUserCampusStatus({
+          lat: latitude,
+          lng: longitude,
+          accuracy: Math.round(accuracy),
+          distanceMeters: Math.round(d),
+          isOnCampus,
+        });
 
         const L = (await import('leaflet')).default;
 
@@ -530,32 +581,49 @@ export const GeospatialCampusMap: React.FC<GeospatialCampusMapProps> = ({
           const userIcon = L.divIcon({
             className: 'user-gps-pulse',
             html: `
-              <div class="relative w-7 h-7 flex items-center justify-center">
-                <span class="absolute w-7 h-7 rounded-full bg-cyan-400 opacity-75 animate-ping"></span>
-                <span class="w-4 h-4 rounded-full bg-cyan-500 border-2 border-white shadow-xl"></span>
+              <div class="relative w-9 h-9 flex items-center justify-center">
+                <span class="absolute w-9 h-9 rounded-full bg-cyan-400 opacity-80 animate-ping"></span>
+                <span class="w-5 h-5 rounded-full bg-cyan-500 border-2 border-white shadow-2xl flex items-center justify-center text-[8px] text-white font-black">
+                  YOU
+                </span>
               </div>
             `,
-            iconSize: [28, 28],
-            iconAnchor: [14, 14]
+            iconSize: [36, 36],
+            iconAnchor: [18, 18]
           });
 
           const userMarker = L.marker([latitude, longitude], { icon: userIcon }).addTo(mapInstanceRef.current);
           userMarker.bindPopup(`
-            <div class="p-2 text-xs">
-              <p class="font-bold text-cyan-400">Current Position</p>
-              <p class="text-slate-300">Accuracy: ±${Math.round(accuracy)} meters</p>
+            <div class="p-2 text-xs font-sans text-slate-100">
+              <p class="font-black text-cyan-400 flex items-center gap-1">📍 Your Current Position</p>
+              <p class="text-slate-200 mt-1 font-semibold">${isOnCampus ? '✅ Located Inside SIET Campus' : `📍 Off Campus (~${(d / 1000).toFixed(1)} km away)`}</p>
+              <p class="text-[10px] text-slate-400 mt-0.5">GPS Precision: ±${Math.round(accuracy)} meters</p>
             </div>
           `);
 
           userMarkerRef.current = userMarker;
-          mapInstanceRef.current.setView([latitude, longitude], 18);
+
+          if (autoCenter) {
+            if (isOnCampus) {
+              mapInstanceRef.current.flyTo([latitude, longitude], 19, { animate: true, duration: 1.5 });
+              setTimeout(() => userMarker.openPopup(), 1600);
+            } else {
+              // Off-campus test: show both user location and SIET campus
+              const gateCoords: [number, number] = [11.040913, 77.077493];
+              const bounds = L.latLngBounds([[latitude, longitude], gateCoords]);
+              mapInstanceRef.current.fitBounds(bounds, { padding: [60, 60], maxZoom: 17 });
+              setTimeout(() => userMarker.openPopup(), 1200);
+            }
+          }
         }
       },
       (err) => {
-        setGpsError(`GPS Error: ${err.message}. Using Campus Entrance as start position.`);
+        setIsLocating(false);
+        setShowLocationPrompt(false);
+        setGpsError(`Location request: ${err.message}. Showing default campus entrance.`);
         setGpsActive(false);
       },
-      { enableHighAccuracy: true, timeout: 8000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
@@ -671,7 +739,7 @@ export const GeospatialCampusMap: React.FC<GeospatialCampusMapProps> = ({
         </button>
 
         <button
-          onClick={handleToggleGPS}
+          onClick={() => handleToggleGPS()}
           className={`w-9 h-9 rounded-xl border flex items-center justify-center shadow-2xl transition ${
             gpsActive
               ? 'bg-cyan-500 text-slate-950 border-cyan-400 shadow-cyan-500/40'
@@ -1018,6 +1086,78 @@ export const GeospatialCampusMap: React.FC<GeospatialCampusMapProps> = ({
           </button>
         </div>
       )}
+
+      {/* First-Time Mobile Location Access Dialog */}
+      {showLocationPrompt && (
+        <div className="absolute inset-x-4 top-20 sm:top-24 sm:left-1/2 sm:-translate-x-1/2 sm:max-w-md z-40 bg-slate-950/95 backdrop-blur-2xl border-2 border-cyan-500/50 rounded-2xl p-4 shadow-2xl shadow-cyan-950/50 text-slate-100 animate-in zoom-in-95 duration-200">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
+              <Crosshair className={`w-5 h-5 ${isLocating ? 'animate-spin' : 'animate-pulse'}`} />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-extrabold text-white flex items-center gap-1.5">
+                  Enable Campus Location
+                  <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-cyan-500/20 text-cyan-300 uppercase">GPS</span>
+                </h4>
+                <button
+                  onClick={() => setShowLocationPrompt(false)}
+                  className="text-slate-400 hover:text-white p-1"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                Allow location to pinpoint your live position inside SIET, find your nearest exam hall, and start turn-by-turn walking guidance.
+              </p>
+              <div className="flex items-center gap-2 mt-3.5">
+                <button
+                  onClick={() => handleToggleGPS(true)}
+                  disabled={isLocating}
+                  className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-cyan-500/30 transition disabled:opacity-50"
+                >
+                  <Crosshair className={`w-3.5 h-3.5 ${isLocating ? 'animate-spin' : ''}`} />
+                  {isLocating ? 'Pinpointing GPS...' : '📍 Allow & Locate Me'}
+                </button>
+                <button
+                  onClick={() => setShowLocationPrompt(false)}
+                  className="py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 text-xs font-bold transition"
+                >
+                  Explore Map
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Off-Campus Distance Status Banner */}
+      {userCampusStatus && !userCampusStatus.isOnCampus && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 bg-slate-950/95 backdrop-blur-xl border border-amber-500/40 rounded-xl px-3.5 py-1.5 shadow-xl flex items-center gap-2.5 text-xs text-amber-300 animate-in fade-in slide-in-from-top-2">
+          <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+          <span>📍 Located off-campus (~{(userCampusStatus.distanceMeters / 1000).toFixed(1)} km from SIET)</span>
+          <button
+            onClick={handleZoomToCollegeGate}
+            className="px-2 py-0.5 rounded-lg bg-amber-500 text-slate-950 font-black text-[11px] hover:bg-amber-400 transition"
+          >
+            Jump to Campus Gate
+          </button>
+        </div>
+      )}
+
+      {/* Floating GPS Locate Button (Mobile & Desktop) */}
+      <button
+        onClick={() => handleToggleGPS(true)}
+        className={`absolute bottom-6 right-4 sm:bottom-6 sm:right-6 z-30 w-12 h-12 rounded-2xl flex items-center justify-center shadow-2xl backdrop-blur-xl border transition ${
+          gpsActive
+            ? 'bg-cyan-500 text-slate-950 border-cyan-300 shadow-cyan-500/40 ring-4 ring-cyan-500/20'
+            : 'bg-slate-950/90 text-cyan-400 border-slate-700 hover:border-cyan-500 hover:bg-slate-900'
+        }`}
+        title="Locate me on campus"
+        aria-label="Locate me on campus"
+      >
+        <Crosshair className={`w-5 h-5 ${isLocating ? 'animate-spin' : ''}`} />
+      </button>
     </div>
   );
 };

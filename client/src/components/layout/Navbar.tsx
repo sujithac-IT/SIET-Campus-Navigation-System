@@ -80,6 +80,16 @@ export const Navbar: React.FC = () => {
                 <span className="px-1.5 py-0.5 rounded-full text-[8px] font-black uppercase bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 tracking-wider">
                   Smart Campus
                 </span>
+                <a
+                  href="/api/supabase/status"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hidden md:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition"
+                  title="Supabase Backend Health & Database Info"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Supabase Backend</span>
+                </a>
               </div>
             </div>
           </Link>

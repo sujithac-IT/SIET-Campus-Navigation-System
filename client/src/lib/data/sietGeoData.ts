@@ -105,11 +105,11 @@ export const SIET_GEO_BUILDINGS: Building[] = [
     ]
   },
   {
-    id: 'b-main-block',
-    name: 'Main Block (Administrative Headquarters)',
-    code: 'MAIN',
+    id: 'b-academic-block',
+    name: 'Academic Block (COE & Engineering Wing)',
+    code: 'ACAD',
     category: 'admin',
-    description: 'Signature glass-fronted administrative center housing the Principal’s Office, COE, Exam Halls LH 24 to LH 68, and Engineering Laboratories.',
+    description: 'Signature glass-fronted administrative center housing Controller of Examinations (COE), Principal Secretariat, Exam Halls LH 24 to LH 68, and Engineering Laboratories.',
     coordinates: { x: 25, y: 65 },
     lat: 11.039940,
     lng: 77.074923,
@@ -120,8 +120,8 @@ export const SIET_GEO_BUILDINGS: Building[] = [
       [11.040100, 77.075100],
       [11.039800, 77.075100]
     ],
-    icon: 'Building2',
-    color: '#0369a1',
+    icon: 'GraduationCap',
+    color: '#0d9488',
     department: 'Controller of Examinations, Mechanical, Civil, Agri, EEE, Office',
     facilities: ['COE Exam Wing', 'Principal Secretariat', 'Seminar Hall-II', 'Labs 01-13', 'Admissions Cell', 'Visitor Reception'],
     accessibilityInfo: 'Equipped with entrance wheelchair ramp and passenger elevator',
@@ -216,11 +216,11 @@ export const SIET_GEO_BUILDINGS: Building[] = [
     ]
   },
   {
-    id: 'b-academic-block',
-    name: 'Multi-Storey Academic Block',
-    code: 'ACAD',
+    id: 'b-main-block',
+    name: 'Main Block (Five-Storey Academic & Lab Complex)',
+    code: 'MAIN',
     category: 'academic',
-    description: 'Premier 5-storey academic edifice (height: 18m) housing lecture halls LH 01 to LH 23, smart seminar spaces, computer labs, and departmental faculty chambers.',
+    description: 'Premier 5-storey edifice on the west lawn housing Exam Halls LH 01 to LH 23, smart seminar spaces, computer labs, and departmental faculty chambers.',
     coordinates: { x: 45, y: 40 },
     lat: 11.040404,
     lng: 77.074018,
@@ -231,8 +231,8 @@ export const SIET_GEO_BUILDINGS: Building[] = [
       [11.040650, 77.074350],
       [11.040150, 77.074350]
     ],
-    icon: 'GraduationCap',
-    color: '#0d9488',
+    icon: 'Building2',
+    color: '#0284c7',
     department: 'CSE, IT, AI & Data Science, ECE',
     facilities: ['LH 01 to LH 23 Exam Halls', 'Core Computing Labs', 'AI Research Center', 'High-Speed Elevators', 'Restrooms every floor', 'RO Water Dispensers'],
     accessibilityInfo: 'Dual elevator banks, tactile signage, ramp at eastern and southern porches',
@@ -300,55 +300,34 @@ export const SIET_GEO_BUILDINGS: Building[] = [
     ]
   },
   {
-    id: 'b-techpark',
-    name: 'New Block (Tech Park)',
-    code: 'TECH',
-    category: 'academic',
-    description: 'Modern New Block housing Exam Halls 1A to 2D, Innovation Incubation Hub, Cloud Computing Center, and Department Laboratories.',
-    coordinates: { x: 30, y: 66 },
-    lat: 11.040150,
-    lng: 77.075400,
-    entranceCoordinates: { lat: 11.040200, lng: 77.075300 },
+    id: 'b-amphitheatre',
+    name: 'Open Air Amphitheatre',
+    code: 'AMPHI',
+    category: 'facility',
+    description: 'Central circular tiered open-air amphitheatre situated between the Main Block and the Tech Park for cultural events, hackathons, and student assemblies.',
+    coordinates: { x: 42, y: 50 },
+    lat: 11.040320,
+    lng: 77.074400,
+    entranceCoordinates: { lat: 11.040320, lng: 77.074400 },
     polygon: [
-      [11.040050, 77.075250],
-      [11.040350, 77.075250],
-      [11.040350, 77.075600],
-      [11.040050, 77.075600]
+      [11.040220, 77.074250],
+      [11.040450, 77.074250],
+      [11.040450, 77.074600],
+      [11.040220, 77.074600]
     ],
-    icon: 'Cpu',
-    color: '#0ea5e9',
-    department: 'Tech Park & Innovation Wing',
-    facilities: ['Exam Halls 1A-2D', 'AI & Robotics Lab', 'Cloud Computing Lab', 'Elevator', 'Modern Restrooms'],
-    accessibilityInfo: 'Step-free entrance and accessible elevator',
+    icon: 'Sparkles',
+    color: '#ec4899',
+    department: 'Student Affairs & Cultural Wing',
+    facilities: ['Acoustic Stage Shell', 'Circular Tiered Seating', 'Cultural Event Stage', 'Wi-Fi Hotspot', 'Open Sky Assembly'],
+    accessibilityInfo: 'Ground level walkway access with ramp leading to stage perimeter',
     verificationStatus: 'verified',
-    sourceReference: 'Controller of Examinations Official Hall Allocation Table',
-    photoUrl: '/references/siet_campus_satellite_internal_road.jpg',
+    sourceReference: 'Campus Satellite Imagery & Student Assembly Grounds',
     floors: [
       {
         level: 0,
-        name: 'Ground Floor',
+        name: 'Ground Level Arena',
         rooms: [
-          { id: 'r-tp-foyer', code: 'TP-FOYER', name: 'Tech Park Foyer & Incubation Center', type: 'office', buildingId: 'b-techpark', floor: 0, isAvailable: true, coordinates: { x: 30, y: 66 }, description: 'Student startup incubation and innovation showcase.' }
-        ]
-      },
-      {
-        level: 1,
-        name: '1st Floor',
-        rooms: [
-          { id: 'r-tp-1a', code: '1A', name: 'Exam Hall 1A', type: 'classroom', buildingId: 'b-techpark', floor: 1, isAvailable: true, coordinates: { x: 29, y: 66 }, description: '1st floor - New Block (Tech Park)' },
-          { id: 'r-tp-1b', code: '1B', name: 'Exam Hall 1B', type: 'classroom', buildingId: 'b-techpark', floor: 1, isAvailable: true, coordinates: { x: 30, y: 66 }, description: '1st floor - New Block (Tech Park)' },
-          { id: 'r-tp-1c', code: '1C', name: 'Exam Hall 1C', type: 'classroom', buildingId: 'b-techpark', floor: 1, isAvailable: true, coordinates: { x: 31, y: 66 }, description: '1st floor - New Block (Tech Park)' },
-          { id: 'r-tp-1d', code: '1D', name: 'Exam Hall 1D', type: 'classroom', buildingId: 'b-techpark', floor: 1, isAvailable: true, coordinates: { x: 31, y: 67 }, description: '1st floor - New Block (Tech Park)' }
-        ]
-      },
-      {
-        level: 2,
-        name: '2nd Floor',
-        rooms: [
-          { id: 'r-tp-2a', code: '2A', name: 'Exam Hall 2A', type: 'classroom', buildingId: 'b-techpark', floor: 2, isAvailable: true, coordinates: { x: 29, y: 66 }, description: '2nd floor - New Block (Tech Park)' },
-          { id: 'r-tp-2b', code: '2B', name: 'Exam Hall 2B', type: 'classroom', buildingId: 'b-techpark', floor: 2, isAvailable: true, coordinates: { x: 30, y: 66 }, description: '2nd floor - New Block (Tech Park)' },
-          { id: 'r-tp-2c', code: '2C', name: 'Exam Hall 2C', type: 'classroom', buildingId: 'b-techpark', floor: 2, isAvailable: true, coordinates: { x: 31, y: 66 }, description: '2nd floor - New Block (Tech Park)' },
-          { id: 'r-tp-2d', code: '2D', name: 'Exam Hall 2D', type: 'classroom', buildingId: 'b-techpark', floor: 2, isAvailable: true, coordinates: { x: 31, y: 67 }, description: '2nd floor - New Block (Tech Park)' }
+          { id: 'r-amphi-stage', code: 'AMPHI-STAGE', name: 'Amphitheatre Stage Arena', type: 'auditorium', buildingId: 'b-amphitheatre', floor: 0, isAvailable: true, coordinates: { x: 42, y: 50 }, description: 'Circular amphitheatre performance stage situated between Main Block and Tech Park.' }
         ]
       }
     ]
@@ -390,11 +369,11 @@ export const SIET_GEO_BUILDINGS: Building[] = [
     ]
   },
   {
-    id: 'b-library',
-    name: 'Central Library & Seminar Complex',
-    code: 'LIB',
-    category: 'facility',
-    description: 'Modern two-storey resource hub housing digital repository, reference stacks, journal section, and Seminar Halls I & II.',
+    id: 'b-techpark',
+    name: 'Tech Park (New Innovation & Computing Block)',
+    code: 'TECH',
+    category: 'academic',
+    description: 'Modern Tech Park located adjacent to the amphitheatre housing Exam Halls 1A to 2D, Incubation Center, AI & Robotics Lab, and Central Digital Library.',
     coordinates: { x: 50, y: 55 },
     lat: 11.040734,
     lng: 77.074880,
@@ -405,29 +384,43 @@ export const SIET_GEO_BUILDINGS: Building[] = [
       [11.040850, 77.075050],
       [11.040600, 77.075050]
     ],
-    icon: 'BookOpen',
+    icon: 'Cpu',
     color: '#8b5cf6',
-    department: 'Central Library & Information Center',
-    facilities: ['Over 50,000 Volumes', 'Digital Library (100 Nodes)', 'Seminar Hall I (Capacity: 350)', 'IEEE / ScienceDirect Access', 'Quiet Reading Lounge'],
-    accessibilityInfo: 'Step-free entrance ramp and ground-floor accessible circulation desk',
+    department: 'Tech Park, Cloud Computing, Startup Incubator & Innovation Wing',
+    facilities: ['Exam Halls 1A, 1B, 1C, 1D, 2A, 2B, 2C, 2D', 'AI & Robotics Lab', 'Cloud Computing Lab', 'Digital Library (100 Nodes)', 'Elevator', 'Modern Restrooms'],
+    accessibilityInfo: 'Step-free entrance and accessible elevator',
     verificationStatus: 'verified',
-    sourceReference: 'OSM Way 1243485318 & Campus Building Directory',
+    sourceReference: 'Controller of Examinations Official Hall Allocation Table & Campus Satellite Imagery',
     photoUrl: '/references/siet_campus_satellite_internal_road.jpg',
     floors: [
       {
         level: 0,
         name: 'Ground Floor',
         rooms: [
-          { id: 'r-lib-circ', code: 'LIB-G', name: 'Circulation Desk & Reference Stacks', type: 'library', buildingId: 'b-library', floor: 0, isAvailable: true, coordinates: { x: 50, y: 55 }, description: 'Book lending, returns, student card registration, and general stacks.' },
-          { id: 'r-sem-hall-1', code: 'SEM-1', name: 'Dr. APJ Abdul Kalam Seminar Hall', type: 'auditorium', buildingId: 'b-library', floor: 0, isAvailable: true, coordinates: { x: 51, y: 55 }, description: 'Acoustically treated 350-seat auditorium with Dolby audio.' }
+          { id: 'r-tp-foyer', code: 'TP-FOYER', name: 'Tech Park Foyer & Incubation Center', type: 'office', buildingId: 'b-techpark', floor: 0, isAvailable: true, coordinates: { x: 50, y: 55 }, description: 'Student startup incubation and innovation showcase.' },
+          { id: 'r-lib-circ', code: 'LIB-G', name: 'Central Library Reference & Stacks', type: 'library', buildingId: 'b-techpark', floor: 0, isAvailable: true, coordinates: { x: 50, y: 56 }, description: 'Book lending, returns, student card registration, and general stacks.' },
+          { id: 'r-sem-hall-1', code: 'SEM-1', name: 'Dr. APJ Abdul Kalam Seminar Hall', type: 'auditorium', buildingId: 'b-techpark', floor: 0, isAvailable: true, coordinates: { x: 51, y: 55 }, description: 'Acoustically treated 350-seat auditorium with Dolby audio.' }
         ]
       },
       {
         level: 1,
         name: '1st Floor',
         rooms: [
-          { id: 'r-lib-digital', code: 'LIB-DIG', name: 'Digital Library & E-Learning Lab', type: 'lab', buildingId: 'b-library', floor: 1, isAvailable: true, coordinates: { x: 50, y: 55 }, description: '100 multimedia workstations with NPTEL and online journal access.' },
-          { id: 'r-sem-hall-2-lib', code: 'SEM-2', name: 'Seminar Hall II', type: 'seminar', buildingId: 'b-library', floor: 1, isAvailable: true, coordinates: { x: 51, y: 55 }, description: 'Department presentations, guest lectures, and student symposiums.' }
+          { id: 'r-tp-1a', code: '1A', name: 'Exam Hall 1A', type: 'classroom', buildingId: 'b-techpark', floor: 1, isAvailable: true, coordinates: { x: 49, y: 55 }, description: '1st floor - Tech Park' },
+          { id: 'r-tp-1b', code: '1B', name: 'Exam Hall 1B', type: 'classroom', buildingId: 'b-techpark', floor: 1, isAvailable: true, coordinates: { x: 50, y: 55 }, description: '1st floor - Tech Park' },
+          { id: 'r-tp-1c', code: '1C', name: 'Exam Hall 1C', type: 'classroom', buildingId: 'b-techpark', floor: 1, isAvailable: true, coordinates: { x: 51, y: 55 }, description: '1st floor - Tech Park' },
+          { id: 'r-tp-1d', code: '1D', name: 'Exam Hall 1D', type: 'classroom', buildingId: 'b-techpark', floor: 1, isAvailable: true, coordinates: { x: 51, y: 56 }, description: '1st floor - Tech Park' },
+          { id: 'r-lib-digital', code: 'LIB-DIG', name: 'Digital Library & E-Learning Lab', type: 'lab', buildingId: 'b-techpark', floor: 1, isAvailable: true, coordinates: { x: 50, y: 57 }, description: '100 multimedia workstations with NPTEL and online journal access.' }
+        ]
+      },
+      {
+        level: 2,
+        name: '2nd Floor',
+        rooms: [
+          { id: 'r-tp-2a', code: '2A', name: 'Exam Hall 2A', type: 'classroom', buildingId: 'b-techpark', floor: 2, isAvailable: true, coordinates: { x: 49, y: 55 }, description: '2nd floor - Tech Park' },
+          { id: 'r-tp-2b', code: '2B', name: 'Exam Hall 2B', type: 'classroom', buildingId: 'b-techpark', floor: 2, isAvailable: true, coordinates: { x: 50, y: 55 }, description: '2nd floor - Tech Park' },
+          { id: 'r-tp-2c', code: '2C', name: 'Exam Hall 2C', type: 'classroom', buildingId: 'b-techpark', floor: 2, isAvailable: true, coordinates: { x: 51, y: 55 }, description: '2nd floor - Tech Park' },
+          { id: 'r-tp-2d', code: '2D', name: 'Exam Hall 2D', type: 'classroom', buildingId: 'b-techpark', floor: 2, isAvailable: true, coordinates: { x: 51, y: 56 }, description: '2nd floor - Tech Park' }
         ]
       }
     ]
@@ -534,34 +527,67 @@ export const SIET_GEO_BUILDINGS: Building[] = [
     ]
   },
   {
-    id: 'b-hostels',
-    name: 'Student Residential Hostels',
-    code: 'HOSTEL',
+    id: 'b-girls-hostel',
+    name: 'Girls Hostel Complex',
+    code: 'G-HOSTEL',
     category: 'hostel',
-    description: 'On-campus student residence halls offering furnished rooms, Wi-Fi connectivity, recreation rooms, and round-the-clock wardens.',
-    coordinates: { x: 80, y: 40 },
-    lat: 11.038549,
-    lng: 77.073568,
-    entranceCoordinates: { lat: 11.038540, lng: 77.073722 },
+    description: 'Secure residential quarters for female students featuring furnished rooms, dining hall, study lounge, and 24/7 security warden.',
+    coordinates: { x: 85, y: 75 },
+    lat: 11.038450,
+    lng: 77.073900,
+    entranceCoordinates: { lat: 11.038540, lng: 77.073950 },
     polygon: [
-      [11.038200, 77.073300],
-      [11.038800, 77.073300],
-      [11.038800, 77.073800],
-      [11.038200, 77.073800]
+      [11.038200, 77.073700],
+      [11.038650, 77.073700],
+      [11.038650, 77.074150],
+      [11.038200, 77.074150]
     ],
-    icon: 'BedDouble',
-    color: '#a855f7',
+    icon: 'Home',
+    color: '#f43f5e',
     department: 'Hostel Administration',
-    facilities: ['Boys & Girls Residential Wings', 'Study Halls', 'Gymnasium', 'Solar Water Heaters', 'Resident Doctor Clinic'],
-    accessibilityInfo: 'Ground floor accessible rooms reserved for mobility-impaired students',
+    facilities: ['Female Student Dormitories', 'Resident Warden Office', 'Dining Hall', 'RO Water Dispensers', '24/7 Security Desk'],
+    accessibilityInfo: 'Ground floor accessible rooms and entrance ramp',
     verificationStatus: 'verified',
-    sourceReference: 'OSM Way 1243485321 & Student Affairs',
+    sourceReference: 'Campus Hostel Directory',
     floors: [
       {
         level: 0,
         name: 'Ground Floor',
         rooms: [
-          { id: 'r-hst-wrd', code: 'HST-OFF', name: 'Chief Warden Office & First Aid Cell', type: 'office', buildingId: 'b-hostels', floor: 0, isAvailable: true, coordinates: { x: 80, y: 40 } }
+          { id: 'r-gh-warden', code: 'GH-WARDEN', name: 'Girls Hostel Warden Office', type: 'office', buildingId: 'b-girls-hostel', floor: 0, isAvailable: true, coordinates: { x: 85, y: 75 } }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'b-boys-hostel',
+    name: 'Boys Hostel Complex',
+    code: 'B-HOSTEL',
+    category: 'hostel',
+    description: 'Residential quarters for male students with recreational sports room, study hall, and dining services.',
+    coordinates: { x: 80, y: 35 },
+    lat: 11.038200,
+    lng: 77.073200,
+    entranceCoordinates: { lat: 11.038300, lng: 77.073350 },
+    polygon: [
+      [11.038000, 77.073000],
+      [11.038450, 77.073000],
+      [11.038450, 77.073500],
+      [11.038000, 77.073500]
+    ],
+    icon: 'Home',
+    color: '#6366f1',
+    department: 'Hostel Administration',
+    facilities: ['Male Student Dormitories', 'Dining Facility', 'Recreation Room', 'Wi-Fi Study Lounge'],
+    accessibilityInfo: 'Ground floor access',
+    verificationStatus: 'verified',
+    sourceReference: 'Campus Hostel Directory',
+    floors: [
+      {
+        level: 0,
+        name: 'Ground Floor',
+        rooms: [
+          { id: 'r-bh-warden', code: 'BH-WARDEN', name: 'Boys Hostel Warden Office', type: 'office', buildingId: 'b-boys-hostel', floor: 0, isAvailable: true, coordinates: { x: 80, y: 35 } }
         ]
       }
     ]
@@ -578,20 +604,17 @@ export const GEOSPATIAL_PATH_NODES: PathNode[] = [
 
   // Central Boulevard & Roundabout
   { id: 'gn-roundabout', name: 'Central Campus Roundabout', coordinates: { x: 25, y: 70 }, lat: 11.040926, lng: 77.075120, kind: 'junction', verificationStatus: 'verified' },
-  { id: 'gn-admin-porch', name: 'Main Administrative Block Porch', coordinates: { x: 25, y: 65 }, lat: 11.040050, lng: 77.075050, kind: 'door', buildingId: 'b-main-block', verificationStatus: 'verified' },
-  { id: 'gn-tech-porch', name: 'New Block (Tech Park) Entrance', coordinates: { x: 30, y: 66 }, lat: 11.040200, lng: 77.075300, kind: 'door', buildingId: 'b-techpark', verificationStatus: 'verified' },
+  { id: 'gn-admin-porch', name: 'Academic Block Porch (COE Wing)', coordinates: { x: 25, y: 65 }, lat: 11.040050, lng: 77.075050, kind: 'door', buildingId: 'b-academic-block', verificationStatus: 'verified' },
+  { id: 'gn-tech-porch', name: 'Tech Park Main Entrance', coordinates: { x: 50, y: 55 }, lat: 11.040680, lng: 77.074800, kind: 'door', buildingId: 'b-techpark', verificationStatus: 'verified' },
+  { id: 'gn-amphi', name: 'Open Air Amphitheatre', coordinates: { x: 42, y: 50 }, lat: 11.040320, lng: 77.074400, kind: 'outdoor', buildingId: 'b-amphitheatre', verificationStatus: 'verified' },
   { id: 'gn-cafe-junction', name: 'Food Court Promenade', coordinates: { x: 35, y: 68 }, lat: 11.039601, lng: 77.075060, kind: 'junction', verificationStatus: 'verified' },
   { id: 'gn-cafe-door', name: 'Food Court Main Entrance', coordinates: { x: 38, y: 68 }, lat: 11.039554, lng: 77.075400, kind: 'door', buildingId: 'b-foodcourt', verificationStatus: 'verified' },
 
-  // Library & North Crossway
-  { id: 'gn-lib-cross', name: 'Library Crossway North', coordinates: { x: 48, y: 60 }, lat: 11.040849, lng: 77.075120, kind: 'junction', verificationStatus: 'verified' },
-  { id: 'gn-lib-door', name: 'Central Library Foyer', coordinates: { x: 50, y: 55 }, lat: 11.040680, lng: 77.074800, kind: 'door', buildingId: 'b-library', verificationStatus: 'verified' },
-
-  // Academic Corridor Network
-  { id: 'gn-acad-east-junc', name: 'Academic Block East Intersection', coordinates: { x: 40, y: 45 }, lat: 11.040776, lng: 77.074315, kind: 'junction', verificationStatus: 'verified' },
-  { id: 'gn-acad-main-door', name: 'Academic Block Main Porch', coordinates: { x: 45, y: 40 }, lat: 11.040450, lng: 77.074250, kind: 'door', buildingId: 'b-academic-block', verificationStatus: 'verified' },
-  { id: 'gn-acad-central-cross', name: 'Academic Plaza West', coordinates: { x: 48, y: 38 }, lat: 11.040404, lng: 77.074018, kind: 'junction', verificationStatus: 'verified' },
-  { id: 'gn-acad-west-junc', name: 'Academic Block West Walkway', coordinates: { x: 52, y: 36 }, lat: 11.040724, lng: 77.073681, kind: 'junction', verificationStatus: 'verified' },
+  // Academic Corridor & Main Block
+  { id: 'gn-acad-east-junc', name: 'Amphitheatre & Main Block Plaza', coordinates: { x: 40, y: 45 }, lat: 11.040776, lng: 77.074315, kind: 'junction', verificationStatus: 'verified' },
+  { id: 'gn-acad-main-door', name: 'Main Block Porch (5-Storey Complex)', coordinates: { x: 45, y: 40 }, lat: 11.040450, lng: 77.074250, kind: 'door', buildingId: 'b-main-block', verificationStatus: 'verified' },
+  { id: 'gn-acad-central-cross', name: 'Main Block Central Courtyard', coordinates: { x: 48, y: 38 }, lat: 11.040404, lng: 77.074018, kind: 'junction', verificationStatus: 'verified' },
+  { id: 'gn-acad-west-junc', name: 'Main Block West Walkway', coordinates: { x: 52, y: 36 }, lat: 11.040724, lng: 77.073681, kind: 'junction', verificationStatus: 'verified' },
 
   // Mechanical Workshop Approach
   { id: 'gn-mech-junc', name: 'Workshop Avenue Junction', coordinates: { x: 35, y: 32 }, lat: 11.040970, lng: 77.073663, kind: 'junction', verificationStatus: 'verified' },
@@ -602,7 +625,8 @@ export const GEOSPATIAL_PATH_NODES: PathNode[] = [
   { id: 'gn-bball-court', name: 'Basketball Court Pavilion', coordinates: { x: 75, y: 73 }, lat: 11.039450, lng: 77.073400, kind: 'court', buildingId: 'b-sports-arena', verificationStatus: 'verified' },
   { id: 'gn-hball-court', name: 'Handball Court Stand', coordinates: { x: 75, y: 76 }, lat: 11.039150, lng: 77.073350, kind: 'court', buildingId: 'b-sports-arena', verificationStatus: 'verified' },
   { id: 'gn-hostel-junc', name: 'Hostel Avenue Junction', coordinates: { x: 78, y: 45 }, lat: 11.038540, lng: 77.073722, kind: 'junction', verificationStatus: 'verified' },
-  { id: 'gn-hostel-door', name: 'Hostel Main Reception', coordinates: { x: 80, y: 40 }, lat: 11.038549, lng: 77.073568, kind: 'door', buildingId: 'b-hostels', verificationStatus: 'verified' }
+  { id: 'gn-ghostel-door', name: 'Girls Hostel Reception', coordinates: { x: 85, y: 75 }, lat: 11.038540, lng: 77.073950, kind: 'door', buildingId: 'b-girls-hostel', verificationStatus: 'verified' },
+  { id: 'gn-bhostel-door', name: 'Boys Hostel Reception', coordinates: { x: 80, y: 35 }, lat: 11.038300, lng: 77.073350, kind: 'door', buildingId: 'b-boys-hostel', verificationStatus: 'verified' }
 ];
 
 // Connected Walking Edges with Measured Distances and Accessibility Details
@@ -676,8 +700,16 @@ export const GEOSPATIAL_PATH_EDGES: PathEdge[] = [
   // Sports Complex to Hostels
   { from: 'gn-sports-junc', to: 'gn-hostel-junc', distanceMeters: 110, isAccessible: true, type: 'walkway', surface: 'asphalt', landmarkText: 'Proceed south along the avenue toward student residential hostels', verificationStatus: 'verified' },
   { from: 'gn-hostel-junc', to: 'gn-sports-junc', distanceMeters: 110, isAccessible: true, type: 'walkway', surface: 'asphalt', landmarkText: 'Walk north toward the Sports Arena and courts', verificationStatus: 'verified' },
-  { from: 'gn-hostel-junc', to: 'gn-hostel-door', distanceMeters: 25, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Enter student residential hostel reception', verificationStatus: 'verified' },
-  { from: 'gn-hostel-door', to: 'gn-hostel-junc', distanceMeters: 25, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Exit hostel to campus avenue', verificationStatus: 'verified' }
+  { from: 'gn-hostel-junc', to: 'gn-ghostel-door', distanceMeters: 22, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Walk into Girls Hostel reception & foyer', verificationStatus: 'verified' },
+  { from: 'gn-ghostel-door', to: 'gn-hostel-junc', distanceMeters: 22, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Exit Girls Hostel onto residential avenue', verificationStatus: 'verified' },
+  { from: 'gn-hostel-junc', to: 'gn-bhostel-door', distanceMeters: 25, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Walk into Boys Hostel reception', verificationStatus: 'verified' },
+  { from: 'gn-bhostel-door', to: 'gn-hostel-junc', distanceMeters: 25, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Exit Boys Hostel onto residential avenue', verificationStatus: 'verified' },
+
+  // Amphitheatre Connections (between Main Block and Tech Park)
+  { from: 'gn-acad-main-door', to: 'gn-amphi', distanceMeters: 30, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Step out of Main Block into Open Air Amphitheatre', verificationStatus: 'verified' },
+  { from: 'gn-amphi', to: 'gn-acad-main-door', distanceMeters: 30, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Walk from Amphitheatre into Main Block porch', verificationStatus: 'verified' },
+  { from: 'gn-amphi', to: 'gn-tech-porch', distanceMeters: 45, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Walk east from Amphitheatre to Tech Park entrance', verificationStatus: 'verified' },
+  { from: 'gn-tech-porch', to: 'gn-amphi', distanceMeters: 45, isAccessible: true, type: 'walkway', surface: 'paved', landmarkText: 'Walk west from Tech Park to Open Air Amphitheatre', verificationStatus: 'verified' }
 ];
 
 export const MAP_LAYERS = {

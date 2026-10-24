@@ -26,7 +26,8 @@ export const CATEGORY_CHIPS: CategoryChip[] = [
   { id: 'TECHPARK', label: 'Tech Park', icon: <Cpu className="w-3.5 h-3.5" />, count: 10 },
   { id: 'CANTEEN', label: 'Canteen & Food', icon: <Coffee className="w-3.5 h-3.5" />, count: 2 },
   { id: 'LIBRARY', label: 'Library', icon: <BookOpen className="w-3.5 h-3.5" />, count: 2 },
-  { id: 'HOSTEL', label: 'Hostels', icon: <Home className="w-3.5 h-3.5" />, count: 2 },
+  { id: 'HOSTEL', label: 'Girls & Boys Hostels', icon: <Home className="w-3.5 h-3.5" />, count: 2 },
+  { id: 'AMPHI', label: 'Amphitheatre & Plaza', icon: <Sparkles className="w-3.5 h-3.5" />, count: 1 },
   { id: 'WASHROOM', label: 'Washrooms', icon: <Bath className="w-3.5 h-3.5" />, count: 4 },
   { id: 'GATE', label: 'Gates & Parking', icon: <MapPin className="w-3.5 h-3.5" />, count: 2 },
 ];
