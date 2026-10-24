@@ -6,10 +6,15 @@ import { Navigation, Clock, Footprints, Compass, X } from 'lucide-react';
 
 interface NavigationRouteProps {
   route: RouteResult;
-  onClear: () => void;
+  onClear?: () => void;
+  isAccessibilityMode?: boolean;
 }
 
-export const NavigationRoute: React.FC<NavigationRouteProps> = ({ route, onClear }) => {
+export const NavigationRoute: React.FC<NavigationRouteProps> = ({
+  route,
+  onClear,
+  isAccessibilityMode = false,
+}) => {
   if (!route || route.nodes.length < 2) return null;
 
   // Build SVG path data string

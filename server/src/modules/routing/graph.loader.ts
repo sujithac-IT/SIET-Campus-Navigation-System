@@ -36,22 +36,22 @@ export interface CampusGraph {
 }
 
 // -----------------------------------------------------------------------------
-// Realistic SIET Campus Walkable Fallback Topology (Outdoor + 3 Buildings)
+// Real SIET Campus Walkable Fallback Topology (Coimbatore, Tamil Nadu)
 // -----------------------------------------------------------------------------
-const SIET_LAT = 11.0827;
-const SIET_LNG = 77.0607;
+const SIET_LAT = 11.04035;
+const SIET_LNG = 77.07485;
 
 const FALLBACK_NODES: CampusNode[] = [
   // Outdoor Gates & Arterials
-  { id: 'node-gate-main', label: 'Main Entrance Gate', kind: NodeKind.GATE, lat: SIET_LAT, lng: SIET_LNG, x: 0, y: 0, floorId: null, level: 0 },
-  { id: 'node-plaza', label: 'Central Campus Plaza', kind: NodeKind.JUNCTION, lat: SIET_LAT + 0.0004, lng: SIET_LNG + 0.0002, x: 20, y: 44, floorId: null, level: 0 },
-  { id: 'node-canteen', label: 'Canteen Promenade', kind: NodeKind.OUTDOOR, lat: SIET_LAT + 0.0003, lng: SIET_LNG - 0.0003, x: -33, y: 33, floorId: null, level: 0 },
-  { id: 'node-hostel-cross', label: 'Hostel Avenue Junction', kind: NodeKind.OUTDOOR, lat: SIET_LAT + 0.0009, lng: SIET_LNG - 0.0006, x: -66, y: 100, floorId: null, level: 0 },
+  { id: 'node-gate-main', label: 'Main Entrance Gate (NH 544)', kind: NodeKind.GATE, lat: 11.040913, lng: 77.077493, x: 0, y: 0, floorId: null, level: 0 },
+  { id: 'node-plaza', label: 'Central Campus Plaza & Roundabout', kind: NodeKind.JUNCTION, lat: 11.040926, lng: 77.075120, x: 20, y: 44, floorId: null, level: 0 },
+  { id: 'node-canteen', label: 'Canteen & Food Court Promenade', kind: NodeKind.OUTDOOR, lat: 11.039554, lng: 77.075400, x: -33, y: 33, floorId: null, level: 0 },
+  { id: 'node-hostel-cross', label: 'Hostel Avenue Junction', kind: NodeKind.OUTDOOR, lat: 11.038540, lng: 77.073722, x: -66, y: 100, floorId: null, level: 0 },
 
   // Building Entrances
-  { id: 'node-acad-entry', label: 'Academic Block Porch', kind: NodeKind.DOOR, lat: SIET_LAT + 0.0004, lng: SIET_LNG + 0.0004, x: 44, y: 44, floorId: 'f-acad-0', level: 0 },
-  { id: 'node-lib-entry', label: 'Central Library Foyer', kind: NodeKind.DOOR, lat: SIET_LAT + 0.0007, lng: SIET_LNG - 0.0001, x: -11, y: 77, floorId: 'f-lib-0', level: 0 },
-  { id: 'node-tech-entry', label: 'Tech Park Lobby Entrance', kind: NodeKind.DOOR, lat: SIET_LAT + 0.0011, lng: SIET_LNG + 0.0005, x: 55, y: 122, floorId: 'f-tech-0', level: 0 },
+  { id: 'node-acad-entry', label: 'Academic Block Porch', kind: NodeKind.DOOR, lat: 11.040450, lng: 77.074250, x: 44, y: 44, floorId: 'f-acad-0', level: 0 },
+  { id: 'node-lib-entry', label: 'Central Library Foyer', kind: NodeKind.DOOR, lat: 11.040680, lng: 77.074800, x: -11, y: 77, floorId: 'f-lib-0', level: 0 },
+  { id: 'node-tech-entry', label: 'Main Admin Block Porch', kind: NodeKind.DOOR, lat: 11.040050, lng: 77.075050, x: 55, y: 122, floorId: 'f-tech-0', level: 0 },
 
   // Academic Block Indoors
   { id: 'node-acad-f0', label: 'Acad Ground Floor Corridor', kind: NodeKind.JUNCTION, lat: SIET_LAT + 0.00048, lng: SIET_LNG + 0.00042, x: 46, y: 53, floorId: 'f-acad-0', level: 0 },

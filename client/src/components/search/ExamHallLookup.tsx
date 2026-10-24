@@ -20,20 +20,23 @@ export const ExamHallLookup: React.FC = () => {
       coordinates: { x: number; y: number };
     }[] = [];
 
+    const seen = new Set<string>();
     store.buildings.forEach((b) => {
       b.floors.forEach((f) => {
         f.rooms.forEach((r) => {
-          if (
+          const isExamOrLab =
             r.code.startsWith('LH') ||
             r.code.startsWith('MELH') ||
-            r.code.includes('1A') ||
-            r.code.includes('1B') ||
-            r.code.includes('1C') ||
-            r.code.includes('2A') ||
-            r.code.includes('2B') ||
-            r.code.includes('2C') ||
-            r.code.includes('SEM-HALL')
-          ) {
+            r.code.startsWith('Lab') ||
+            r.code.startsWith('SEM') ||
+            ['1A', '1B', '1C', '1D', '2A', '2B', '2C', '2D'].includes(r.code) ||
+            r.type === 'classroom' ||
+            r.type === 'lab' ||
+            r.type === 'seminar';
+
+          const key = `${r.code}-${b.id}-${f.level}`;
+          if (isExamOrLab && !seen.has(key)) {
+            seen.add(key);
             halls.push({
               code: r.code,
               name: r.name,
@@ -74,20 +77,20 @@ export const ExamHallLookup: React.FC = () => {
           <div className="flex items-center gap-2">
             <h3 className="text-base font-extrabold text-white flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-amber-400" />
-              SIET Controller of Examinations - Hall Locator
+              SIET Controller of Examinations - Hall & Lab Locator
             </h3>
             <span className="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30">
               Official Schedule
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-0.5">
-            Search any exam hall (e.g. "LH 34A", "LH 50", "MELH 09", "1B", "Seminar Hall-II")
+            Search any exam hall (e.g. "LH 01", "LH 26", "LH 36", "LH 54", "1A", "Lab 01", "Seminar Hall-II")
           </p>
         </div>
 
         {/* Quick Filter Buttons */}
         <div className="flex flex-wrap items-center gap-1 text-xs">
-          {['LH 01', 'LH 25', 'LH 34A', 'LH 50', 'MELH 09', '1A-I'].map((code) => (
+          {['LH 01', 'LH 24', 'LH 36', 'LH 54', '1A', 'Lab 01', 'Seminar Hall-II'].map((code) => (
             <button
               key={code}
               onClick={() => setQuery(code)}
@@ -106,14 +109,14 @@ export const ExamHallLookup: React.FC = () => {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder='Type exam hall (e.g. "LH 34A", "MELH 12", "LH 51", "Tech Park")...'
+          placeholder='Type exam hall or lab (e.g. "LH 01", "LH 26", "LH 36", "1A", "Lab 06", "Tech Park")...'
           className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-400 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 font-medium"
         />
       </div>
 
       {/* Results Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
-        {filteredHalls.map((hall) => {
+        {filteredHalls.map((hall, idx) => {
           const dist = Math.round(
             Math.sqrt(
               Math.pow(hall.coordinates.x - store.userLocation.x, 2) +
@@ -123,7 +126,7 @@ export const ExamHallLookup: React.FC = () => {
 
           return (
             <div
-              key={hall.code}
+              key={`${hall.code}-${hall.buildingName}-${hall.floorLevel}-${idx}`}
               className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/80 hover:border-amber-500/50 transition flex flex-col justify-between group"
             >
               <div>

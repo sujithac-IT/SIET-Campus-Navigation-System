@@ -17,8 +17,8 @@ export interface BuildingWithFloors extends Building {
 // -----------------------------------------------------------------------------
 // Fallback in-memory catalog for offline / disconnected dev environments
 // -----------------------------------------------------------------------------
-const SIET_LAT = 11.0827;
-const SIET_LNG = 77.0607;
+const SIET_LAT = 11.04035;
+const SIET_LNG = 77.07485;
 
 const FALLBACK_BUILDINGS: BuildingWithFloors[] = [
   {
@@ -26,8 +26,8 @@ const FALLBACK_BUILDINGS: BuildingWithFloors[] = [
     name: 'Main Academic Block',
     code: 'ACAD',
     description: 'Primary lecture halls LH 01 to LH 12 and core engineering labs',
-    centerLat: SIET_LAT + 0.0005,
-    centerLng: SIET_LNG + 0.0003,
+    centerLat: 11.040404,
+    centerLng: 77.074018,
     footprint: null,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -43,8 +43,8 @@ const FALLBACK_BUILDINGS: BuildingWithFloors[] = [
     name: 'Central Library & Auditorium Block',
     code: 'LIB',
     description: 'Central reading halls, digital repository & seminar auditoriums',
-    centerLat: SIET_LAT + 0.0008,
-    centerLng: SIET_LNG - 0.0002,
+    centerLat: 11.040680,
+    centerLng: 77.074800,
     footprint: null,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -59,8 +59,8 @@ const FALLBACK_BUILDINGS: BuildingWithFloors[] = [
     name: 'Tech Park & Innovation Hub',
     code: 'TECH',
     description: 'AI & Robotics Labs, Incubators and Tech Park lecture halls',
-    centerLat: SIET_LAT + 0.0012,
-    centerLng: SIET_LNG + 0.0006,
+    centerLat: 11.039940,
+    centerLng: 77.074923,
     footprint: null,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -75,12 +75,12 @@ const FALLBACK_BUILDINGS: BuildingWithFloors[] = [
 
 const FALLBACK_PLACES: PlaceWithDetails[] = [
   // Campus Outdoor
-  { id: 'p-gate-1', name: 'Main Security Gate & Visitor Checkpoint', code: 'GATE-01', type: PlaceType.GATE, buildingId: null, floorId: null, nodeId: 'node-gate', lat: SIET_LAT, lng: SIET_LNG, aliases: ['Main Gate', 'Arch', 'Security'], tags: ['entrance', 'visitor'], openHours: null, description: null, createdAt: new Date(), updatedAt: new Date() },
-  { id: 'p-cant-1', name: 'Student Canteen', code: 'CANTEEN-01', type: PlaceType.CANTEEN, buildingId: null, floorId: null, nodeId: 'node-cant', lat: SIET_LAT + 0.0003, lng: SIET_LNG - 0.0003, aliases: ['Cafeteria', 'Snack Bar'], tags: ['food', 'refreshment'], openHours: null, description: null, createdAt: new Date(), updatedAt: new Date() },
-  { id: 'p-fc-1', name: 'Campus Food Court & Nescafe Corner', code: 'FOOD-COURT-01', type: PlaceType.FOOD_COURT, buildingId: null, floorId: null, nodeId: 'node-cant', lat: SIET_LAT + 0.00032, lng: SIET_LNG - 0.00032, aliases: ['Juice Point', 'Coffee Shop'], tags: ['food'], openHours: null, description: null, createdAt: new Date(), updatedAt: new Date() },
-  { id: 'p-hb-1', name: 'Boys Hostel — Kaveri Block', code: 'HOSTEL-B-01', type: PlaceType.HOSTEL_BOYS, buildingId: null, floorId: null, nodeId: 'node-hostel', lat: SIET_LAT + 0.0010, lng: SIET_LNG - 0.0007, aliases: ['Boys Hostel', 'Gents Hostel'], tags: ['hostel'], openHours: null, description: null, createdAt: new Date(), updatedAt: new Date() },
-  { id: 'p-hg-1', name: 'Girls Hostel — Bhavani Block', code: 'HOSTEL-G-01', type: PlaceType.HOSTEL_GIRLS, buildingId: null, floorId: null, nodeId: 'node-hostel', lat: SIET_LAT + 0.0011, lng: SIET_LNG - 0.0005, aliases: ['Girls Hostel', 'Ladies Hostel'], tags: ['hostel'], openHours: null, description: null, createdAt: new Date(), updatedAt: new Date() },
-  { id: 'p-pk-1', name: 'Visitor & Staff Vehicle Parking', code: 'PARK-MAIN', type: PlaceType.PARKING, buildingId: null, floorId: null, nodeId: 'node-gate', lat: SIET_LAT + 0.0001, lng: SIET_LNG + 0.0001, aliases: ['Bike Parking', 'Car Parking'], tags: ['parking'], openHours: null, description: null, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'p-gate-1', name: 'Main Security Gate & Visitor Checkpoint', code: 'GATE-01', type: PlaceType.GATE, buildingId: null, floorId: null, nodeId: 'node-gate-main', lat: 11.040913, lng: 77.077493, aliases: ['Main Gate', 'Arch', 'Security'], tags: ['entrance', 'visitor'], openHours: null, description: null, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'p-cant-1', name: 'Student Canteen', code: 'CANTEEN-01', type: PlaceType.CANTEEN, buildingId: null, floorId: null, nodeId: 'node-canteen', lat: 11.039554, lng: 77.075400, aliases: ['Cafeteria', 'Snack Bar'], tags: ['food', 'refreshment'], openHours: null, description: null, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'p-fc-1', name: 'Campus Food Court & Nescafe Corner', code: 'FOOD-COURT-01', type: PlaceType.FOOD_COURT, buildingId: null, floorId: null, nodeId: 'node-canteen', lat: 11.039560, lng: 77.075410, aliases: ['Juice Point', 'Coffee Shop'], tags: ['food'], openHours: null, description: null, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'p-hb-1', name: 'Boys Hostel — Kaveri Block', code: 'HOSTEL-B-01', type: PlaceType.HOSTEL_BOYS, buildingId: null, floorId: null, nodeId: 'node-hostel-cross', lat: 11.038540, lng: 77.073722, aliases: ['Boys Hostel', 'Gents Hostel'], tags: ['hostel'], openHours: null, description: null, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'p-hg-1', name: 'Girls Hostel — Bhavani Block', code: 'HOSTEL-G-01', type: PlaceType.HOSTEL_GIRLS, buildingId: null, floorId: null, nodeId: 'node-hostel-cross', lat: 11.038600, lng: 77.073800, aliases: ['Girls Hostel', 'Ladies Hostel'], tags: ['hostel'], openHours: null, description: null, createdAt: new Date(), updatedAt: new Date() },
+  { id: 'p-pk-1', name: 'Visitor & Staff Vehicle Parking', code: 'PARK-MAIN', type: PlaceType.PARKING, buildingId: null, floorId: null, nodeId: 'node-gate-main', lat: 11.041210, lng: 77.076217, aliases: ['Bike Parking', 'Car Parking'], tags: ['parking'], openHours: null, description: null, createdAt: new Date(), updatedAt: new Date() },
 
   // Academic Block
   { id: 'p-lh-01', name: 'Lecture Hall 01', code: 'LH-01', type: PlaceType.CLASSROOM, buildingId: 'b-acad', floorId: 'f-acad-0', nodeId: 'node-acad-f0', lat: SIET_LAT + 0.00047, lng: SIET_LNG + 0.00041, aliases: ['LH 1', 'Room 101'], tags: ['classroom'], openHours: null, description: null, createdAt: new Date(), updatedAt: new Date(), building: FALLBACK_BUILDINGS[0], floor: FALLBACK_BUILDINGS[0]?.floors[0] },
@@ -92,8 +92,8 @@ const FALLBACK_PLACES: PlaceWithDetails[] = [
   { id: 'p-wr-acad-f1', name: 'Academic Block Restrooms (1st Floor)', code: 'REST-ACAD-F1', type: PlaceType.WASHROOM, buildingId: 'b-acad', floorId: 'f-acad-1', nodeId: 'node-acad-f1', lat: SIET_LAT + 0.00045, lng: SIET_LNG + 0.00049, aliases: ['Toilet F1'], tags: ['washroom'], openHours: null, description: null, createdAt: new Date(), updatedAt: new Date(), building: FALLBACK_BUILDINGS[0], floor: FALLBACK_BUILDINGS[0]?.floors[1] },
 
   // Library
-  { id: 'p-lib-stk', name: 'Central Reading Hall & Books Stack', code: 'LIB-STACK', type: PlaceType.LIBRARY, buildingId: 'b-lib', floorId: 'f-lib-0', nodeId: 'node-lib', lat: SIET_LAT + 0.00072, lng: SIET_LNG - 0.00012, aliases: ['Library', 'Books Section'], tags: ['library'], openHours: null, description: null, createdAt: new Date(), updatedAt: new Date(), building: FALLBACK_BUILDINGS[1], floor: FALLBACK_BUILDINGS[1]?.floors[0] },
-  { id: 'p-lib-dig', name: 'Digital Library & E-Resources Centre', code: 'LIB-DIGI', type: PlaceType.LIBRARY, buildingId: 'b-lib', floorId: 'f-lib-0', nodeId: 'node-lib', lat: SIET_LAT + 0.00075, lng: SIET_LNG - 0.00015, aliases: ['E-Library'], tags: ['library'], openHours: null, description: null, createdAt: new Date(), updatedAt: new Date(), building: FALLBACK_BUILDINGS[1], floor: FALLBACK_BUILDINGS[1]?.floors[0] },
+  { id: 'p-lib-stk', name: 'Central Reading Hall & Books Stack', code: 'LIB-STACK', type: PlaceType.LIBRARY, buildingId: 'b-lib', floorId: 'f-lib-0', nodeId: 'node-lib-entry', lat: SIET_LAT + 0.00072, lng: SIET_LNG - 0.00012, aliases: ['Library', 'Books Section'], tags: ['library'], openHours: null, description: null, createdAt: new Date(), updatedAt: new Date(), building: FALLBACK_BUILDINGS[1], floor: FALLBACK_BUILDINGS[1]?.floors[0] },
+  { id: 'p-lib-dig', name: 'Digital Library & E-Resources Centre', code: 'LIB-DIGI', type: PlaceType.LIBRARY, buildingId: 'b-lib', floorId: 'f-lib-0', nodeId: 'node-lib-entry', lat: SIET_LAT + 0.00075, lng: SIET_LNG - 0.00015, aliases: ['E-Library'], tags: ['library'], openHours: null, description: null, createdAt: new Date(), updatedAt: new Date(), building: FALLBACK_BUILDINGS[1], floor: FALLBACK_BUILDINGS[1]?.floors[0] },
 
   // Tech Park
   { id: 'p-tp-201', name: 'Tech Park Smart Classroom 201', code: 'TECH-201', type: PlaceType.TECHPARK, buildingId: 'b-tech', floorId: 'f-tech-1', nodeId: 'node-tech-f1', lat: SIET_LAT + 0.00117, lng: SIET_LNG + 0.00057, aliases: ['TP 201'], tags: ['techpark', 'classroom'], openHours: null, description: null, createdAt: new Date(), updatedAt: new Date(), building: FALLBACK_BUILDINGS[2], floor: FALLBACK_BUILDINGS[2]?.floors[1] },

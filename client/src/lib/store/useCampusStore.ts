@@ -23,13 +23,18 @@ import {
   INITIAL_PATH_NODES,
   INITIAL_PATH_EDGES
 } from '@/lib/data/seedData';
+import {
+  SIET_GEO_BUILDINGS,
+  GEOSPATIAL_PATH_NODES,
+  GEOSPATIAL_PATH_EDGES
+} from '@/lib/data/sietGeoData';
 import { findRoute } from '@/lib/navigation/router';
 
 // In-Memory Global State for real-time reactivity across components
 class GlobalState {
-  public currentUser: User | null = INITIAL_USERS[0]; // Default to student Sujitha C for instant rich mobile home app experience
+  public currentUser: User | null = INITIAL_USERS[0]; // Default to student Sujitha C
   public users: User[] = [...INITIAL_USERS];
-  public buildings: Building[] = [...INITIAL_BUILDINGS];
+  public buildings: Building[] = [...SIET_GEO_BUILDINGS, ...INITIAL_BUILDINGS.filter(b => !SIET_GEO_BUILDINGS.some(g => g.id === b.id || g.code === b.code))];
   public events: CampusEvent[] = [...INITIAL_EVENTS];
   public notifications: NotificationItem[] = [...INITIAL_NOTIFICATIONS];
   public announcements: Announcement[] = [...INITIAL_ANNOUNCEMENTS];
@@ -39,9 +44,9 @@ class GlobalState {
   public selectedBuildingId: string | null = null;
   public selectedFloor: number = 0;
   public selectedRoomCode: string | null = null;
-  public userLocation: { x: number; y: number } = { x: 15, y: 88 }; // Main Gate default
+  public userLocation: { x: number; y: number; lat?: number; lng?: number } = { x: 15, y: 88, lat: 11.040913, lng: 77.077493 }; // Main Gate (NH 544) default
   public activeRoute: RouteResult | null = null;
-  public destination: { x: number; y: number; name: string } | null = null;
+  public destination: { x: number; y: number; lat?: number; lng?: number; name: string } | null = null;
   public isSharingLocation: boolean = true;
   public isAccessibilityMode: boolean = false;
   public latestPushToast: NotificationItem | null = null;
@@ -322,8 +327,15 @@ class GlobalState {
           this.selectedBuildingId = b.id;
           this.selectedFloor = room.floor;
           this.selectedRoomCode = room.code;
-          this.destination = { x: room.coordinates.x, y: room.coordinates.y, name: `${room.name} (${b.name})` };
-          this.activeRoute = findRoute(this.userLocation, room.coordinates, INITIAL_PATH_NODES, INITIAL_PATH_EDGES, { isAccessibleOnly: this.isAccessibilityMode });
+          const targetCoords = {
+            x: room.coordinates.x,
+            y: room.coordinates.y,
+            lat: b.entranceCoordinates?.lat || b.lat,
+            lng: b.entranceCoordinates?.lng || b.lng,
+            name: `${room.name} (${b.name})`
+          };
+          this.destination = targetCoords;
+          this.activeRoute = findRoute(this.userLocation, targetCoords, GEOSPATIAL_PATH_NODES, GEOSPATIAL_PATH_EDGES, { isAccessibleOnly: this.isAccessibilityMode });
           this.notify();
           return true;
         }
@@ -332,17 +344,28 @@ class GlobalState {
     return false;
   }
 
-  public startNavigationToCoords(coords: { x: number; y: number }, name: string) {
-    this.destination = { ...coords, name };
-    this.activeRoute = findRoute(this.userLocation, coords, INITIAL_PATH_NODES, INITIAL_PATH_EDGES, { isAccessibleOnly: this.isAccessibilityMode });
+  public startNavigationToCoords(coords: { x?: number; y?: number; lat?: number; lng?: number }, name: string) {
+    const target = {
+      x: coords.x ?? 50,
+      y: coords.y ?? 50,
+      lat: coords.lat,
+      lng: coords.lng,
+      name
+    };
+    this.destination = target;
+    this.activeRoute = findRoute(this.userLocation, target, GEOSPATIAL_PATH_NODES, GEOSPATIAL_PATH_EDGES, { isAccessibleOnly: this.isAccessibilityMode });
     this.notify();
   }
 
-  public clearNavigation() {
+  public clearActiveRoute() {
     this.activeRoute = null;
     this.destination = null;
     this.selectedRoomCode = null;
     this.notify();
+  }
+
+  public clearNavigation() {
+    this.clearActiveRoute();
   }
 
   public triggerEmergencySOS(details?: string) {

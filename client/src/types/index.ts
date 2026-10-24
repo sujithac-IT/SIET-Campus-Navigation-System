@@ -86,22 +86,36 @@ export interface Building {
   id: string;
   name: string;
   code: string;
-  category: 'academic' | 'admin' | 'facility' | 'hostel' | 'sports' | 'medical' | 'gate';
+  category: 'academic' | 'admin' | 'facility' | 'hostel' | 'sports' | 'medical' | 'gate' | 'parking';
   description: string;
-  coordinates: { x: number; y: number }; // Center position on campus map
+  coordinates: { x: number; y: number }; // Relative percentage for schematic fallback
+  lat?: number;
+  lng?: number;
+  entranceCoordinates?: { lat: number; lng: number };
+  polygon?: [number, number][]; // [lat, lng] array
   footprintPolygon?: { x: number; y: number }[];
   floors: Floor[];
   icon: string;
   color: string;
+  department?: string;
+  facilities?: string[];
+  accessibilityInfo?: string;
+  verificationStatus?: 'verified' | 'unverified' | 'inferred';
+  sourceReference?: string;
+  photoUrl?: string;
 }
 
 export interface PathNode {
   id: string;
   name: string;
   coordinates: { x: number; y: number };
+  lat?: number;
+  lng?: number;
   buildingId?: string;
   floor?: number;
   isStairsOrElevator?: boolean;
+  kind?: 'gate' | 'door' | 'junction' | 'outdoor' | 'stairs' | 'elevator' | 'restroom' | 'court';
+  verificationStatus?: 'verified' | 'provisional';
 }
 
 export interface PathEdge {
@@ -110,6 +124,9 @@ export interface PathEdge {
   distanceMeters: number;
   isAccessible: boolean;
   type: 'walkway' | 'stairs' | 'elevator' | 'corridor';
+  surface?: string;
+  landmarkText?: string;
+  verificationStatus?: 'verified' | 'provisional';
 }
 
 export interface RouteResult {
